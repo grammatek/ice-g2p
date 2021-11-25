@@ -39,11 +39,12 @@ class FairseqG2P:
         :param sep: if True, inserts a separator between each transcribed word in text
         :return: transcribed version of text as string
         """
+        transcribed_arr = []
+        for wrd in text.split(' '):
+            transcribed_arr.append(self.g2p_model.translate(' '.join(wrd)))
         if sep:
-            transcribed_arr = []
-            for wrd in text.split(' '):
-                transcribed_arr.append(self.g2p_model.translate(' '.join(wrd)))
             transcribed = '-'.join(transcribed_arr)
         else:
-            transcribed = self.g2p_model.translate(' '.join(text))
+            transcribed = ' '.join(transcribed_arr)
+        print(transcribed)
         return transcribed
