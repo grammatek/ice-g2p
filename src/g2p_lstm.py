@@ -11,27 +11,31 @@ from fairseq.models.transformer import TransformerModel
 # use this separator
 WORD_SEP = '-'
 ALPHABET = '[aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]'
+DICT_PREFIX = 'dictionaries/ice_pron_dict_'
+
 
 class FairseqG2P:
 
-    def __init__(self, model_path='/fairseq_models/standard/',
-                 model_file='model-256-.3-s-s.pt', use_cwd=True):
+    def __init__(self, model_path='/fairseq_models/',
+                 model_file='model-256-.3-s-s.pt', dialect='standard', use_cwd=True):
         """
         Initializes a Fairseq lstm g2p model according to model_path
         and model_file. If use_cwd=False, be sure to set model_path to
         an absolute path.
         :param model_path: a relative or an absolute path to the model-dir
         :param model_file: the g2p model file
+        :param dialect: the pronunciation variant to use
         :param use_cwd: if set to False, model_path has to be absolute
         """
         if use_cwd:
-            self.model_path = Path(os.getcwd() + model_path)
+            self.model_path = Path(os.getcwd() + model_path + '/' + dialect)
         else:
-            self.model_path = model_path
+            self.model_path = model_path + '/' + dialect
         self.model_file = model_file
         self.g2p_model = TransformerModel.from_pretrained(self.model_path, self.model_file)
+        self.pron_dict = self.read_prondict(dialect)
 
-    def transcribe(self, text, sep=False) -> str:
+    def transcribe(self, text, use_dict=False, sep=False) -> str:
         """
             Transcribes text according to the initialized transformer model.
         Text can be a single word or longer text.
@@ -41,13 +45,31 @@ class FairseqG2P:
         """
         transcribed_arr = []
         for wrd in text.split(' '):
+            if use_dict:
+                transcr = self.pron_dict.get(wrd, '')
+                if transcr:
+                    transcribed_arr.append(transcr)
+                    continue
             if set(wrd).difference(ALPHABET):
                 print(wrd + ' contains non valid character(s) ' + str(set(wrd).difference(ALPHABET)) + ', skipping transcription.')
                 continue
             transcribed_arr.append(self.g2p_model.translate(' '.join(wrd)))
         if sep:
-            transcribed = '-'.join(transcribed_arr)
+            transcribed = WORD_SEP.join(transcribed_arr)
         else:
             transcribed = ' '.join(transcribed_arr)
 
         return transcribed
+
+    @staticmethod
+    def read_prondict(dialect: str) -> dict:
+        dictfile = DICT_PREFIX + dialect + '_clear.csv'
+        prondict = {}
+        with open(dictfile) as f:
+            content = f.read().splitlines()
+        for line in content:
+            wrd, transcr = line.split('\t')
+            prondict[wrd] = transcr
+
+        return prondict
+

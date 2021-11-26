@@ -39,15 +39,14 @@ The options available:
                           input string
   	--keep, -k            keep original
   	--sep, -s             use word separator
+	--dict, -d			  use pronunciation dictionary
 
 Using the `-k` flag keeps the original grapheme strings and for file input/output writes the original strings in the first column of the tab separated output file, and the phonetic transcription in the second one.
-The `-s`flag adds a word separator to the transcription, necessary if the output is to be processed further e.g. through syllabification and stress labeling:
+The `-s`flag adds a word separator to the transcription, necessary if the output is to be processed further e.g. through syllabification and stress labeling. With the `-d` flag all tokens are first looked up in an existing pronunciation dictionary, the automatic g2p is then only a fallback for words not contained in the dictionary.:
 
     %python src/main.py -i 'hljóðrita þetta takk' -k -s
 	hljóðrita þetta takk : l_0 j ou D r I t a-T E h t a-t_h a h k
 
-## Coming up
-This is a repository in development and more options will be added step by step, e.g. the option to use a pronunciation dictionary for the transcription and/or to add syllabification and stress labeling to the output.
 
 ## Trouble shooting & inquiries
 

@@ -41,15 +41,15 @@ def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_origi
             f.write(transcribed[key] + '\n')
 
 
-def process_string(input_str: str, word_sep=False) -> str:
+def process_string(input_str: str, use_dict, word_sep=False) -> str:
     print('processing: "' + input_str + '"')
     g2p = FairseqG2P()
-    transcribed = g2p.transcribe(input_str.strip(), word_sep)
+    transcribed = g2p.transcribe(input_str.strip(), use_dict, word_sep)
 
     return transcribed
 
 
-def process_file(filename: Path, word_sep=False) -> dict:
+def process_file(filename: Path, use_dict=True, word_sep=False) -> dict:
     """
     Transcribes the content of 'filename' line by line
     :param filename: input file to transcribe
@@ -63,12 +63,12 @@ def process_file(filename: Path, word_sep=False) -> dict:
 
     transcribed = {}
     for line in file_content:
-        transcribed[line] = g2p.transcribe(line.strip(), word_sep)
+        transcribed[line] = g2p.transcribe(line.strip(), use_dict, word_sep)
 
     return transcribed
 
 
-def process_file_or_dir(file_or_dir: Path, out_suffix: str, word_sep=False, keep_original=False) -> None:
+def process_file_or_dir(file_or_dir: Path, out_suffix: str, use_dict=False, word_sep=False, keep_original=False) -> None:
     print("processing: " + str(file_or_dir))
     if os.path.isdir(file_or_dir):
         for root, dirs, files in os.walk(file_or_dir):
@@ -76,10 +76,10 @@ def process_file_or_dir(file_or_dir: Path, out_suffix: str, word_sep=False, keep
                 if filename.startswith('.'):
                     continue
                 file_path = Path(os.path.join(root, filename))
-                transcribed_content = process_file(file_path, word_sep)
+                transcribed_content = process_file(file_path, use_dict, word_sep)
                 write_transcribed(transcribed_content, file_path, out_suffix, keep_original)
     elif os.path.isfile(file_or_dir):
-        transcribed_content = process_file(file_or_dir, word_sep)
+        transcribed_content = process_file(file_or_dir, use_dict, word_sep)
         write_transcribed(transcribed_content, file_or_dir, out_suffix, keep_original)
 
 
@@ -91,6 +91,7 @@ def get_arguments():
     group.add_argument('--inputstr', '-i', help='input string')
     parser.add_argument('--keep', '-k', action='store_true', help='keep original')
     parser.add_argument('--sep', '-s', action='store_true', help='use word separator')
+    parser.add_argument('--dict', '-d', action='store_true', help='use pronunciation dictionary')
     return parser.parse_args()
 
 
@@ -98,19 +99,20 @@ def main():
     args = get_arguments()
     keep_original = args.keep
     word_sep = args.sep
+    use_dict = args.dict
     # we need either an input file or directory, or a string from stdin
     if args.infile is not None:
         if not args.infile.exists():
             logging.error(str(args.infile) + ' does not exist.')
             sys.exit(1)
         else:
-            process_file_or_dir(args.infile, '_transcribed', word_sep, keep_original)
+            process_file_or_dir(args.infile, '_transcribed', use_dict, word_sep, keep_original)
 
     if args.inputstr is not None:
         if keep_original:
-            print(args.inputstr + ' : ' + process_string(args.inputstr, word_sep))
+            print(args.inputstr + ' : ' + process_string(args.inputstr, use_dict, word_sep))
         else:
-            print(process_string(args.inputstr, word_sep))
+            print(process_string(args.inputstr, use_dict, word_sep))
 
 
 if __name__ == '__main__':
