@@ -40,12 +40,16 @@ The options available:
   	--keep, -k            keep original
   	--sep, -s             use word separator
 	--dict, -d            use pronunciation dictionary
+	--syll, -y            add syllabification and stress labeling
 
 Using the `-k` flag keeps the original grapheme strings and for file input/output writes the original strings in the first column of the tab separated output file, and the phonetic transcription in the second one.
-The `-s`flag adds a word separator to the transcription, necessary if the output is to be processed further e.g. through syllabification and stress labeling. With the `-d` flag all tokens are first looked up in an existing pronunciation dictionary, the automatic g2p is then only a fallback for words not contained in the dictionary.:
+The `-s`flag adds a word separator to the transcription. With the `-d` flag all tokens are first looked up in an existing pronunciation dictionary, the automatic g2p is then only a fallback for words not contained in the dictionary. With the `-y` flag syllabification and stress labeling is added to the transcription:
 
     %python src/main.py -i 'hljóðrita þetta takk' -k -s
 	hljóðrita þetta takk : l_0 j ou D r I t a-T E h t a-t_h a h k
+
+	%python src/main.py -i 'hljóðrita þetta takk' -k -y
+	hljóðrita þetta takk : l_0 j ou1 D. r I0. t a0. T E1 h. t a0. t_h a1 h k
 
 
 ## Trouble shooting & inquiries
