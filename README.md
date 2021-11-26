@@ -16,6 +16,9 @@ Clone the repository and create a virtual environment in the project root direct
 
 ## Command line interface
 
+**The input strings/texts need to be normalized. The module only handles lowercase characters from the Icelandic alphabet, no punctuation or other characters**
+Characters allowed: [aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]. If other characters are found in the input, the respective token is skipped and a notice written to stdout.
+
 To transcribe text, currently two main options are available, direct from stdin to stdout or from file or a collection of files (directory) 
 
     %python src/main.py -i 'hljóðrita þetta takk'

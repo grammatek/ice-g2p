@@ -10,7 +10,7 @@ from fairseq.models.transformer import TransformerModel
 # if word separation is required in transcribed output
 # use this separator
 WORD_SEP = '-'
-
+ALPHABET = '[aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]'
 
 class FairseqG2P:
 
@@ -41,10 +41,13 @@ class FairseqG2P:
         """
         transcribed_arr = []
         for wrd in text.split(' '):
+            if set(wrd).difference(ALPHABET):
+                print(wrd + ' contains non valid character(s) ' + str(set(wrd).difference(ALPHABET)) + ', skipping transcription.')
+                continue
             transcribed_arr.append(self.g2p_model.translate(' '.join(wrd)))
         if sep:
             transcribed = '-'.join(transcribed_arr)
         else:
             transcribed = ' '.join(transcribed_arr)
-        print(transcribed)
+
         return transcribed
