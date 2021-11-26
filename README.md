@@ -23,7 +23,24 @@ To transcribe text, currently two main options are available, direct from stdin 
 
 	%python src/main.py -if file_to_transcribe.txt
 
-If the input comes from stdin, the output is written to stdout. Input from file(s) is written to file(s) with the same name with the suffix '_transcribed.tsv' in a two-column format. The files are transcribed line by line and written out with the original string (line) in the first column and the phonetic transcription in the second column. This approach is thus applicable both to word lists where a pronunciation dictionary would be the output, and e.g. TTS training data.
+If the input comes from stdin, the output is written to stdout. Input from file(s) is written to file(s) with the same name with the suffix '_transcribed.tsv'. The files are transcribed line by line and written out correspondingly. 
+
+### Flags
+
+The options available:
+
+    --infile INFILE, -if INFILE
+                        inputfile or directory
+  	--inputstr INPUTSTR, -i INPUTSTR
+                          input string
+  	--keep, -k            keep original
+  	--sep, -s             use word separator
+
+Using the `-k` flag keeps the original grapheme strings and for file input/output writes the original strings in the first column of the tab separated output file, and the phonetic transcription in the second one.
+The `-s`flag adds a word separator to the transcription, necessary if the output is to be processed further e.g. through syllabification and stress labeling:
+
+    %python src/main.py -i 'hljóðrita þetta takk' -k -s
+	hljóðrita þetta takk : l_0 j ou D r I t a-T E h t a-t_h a h k
 
 ## Coming up
 This is a repository in development and more options will be added step by step, e.g. the option to use a pronunciation dictionary for the transcription and/or to add syllabification and stress labeling to the output.

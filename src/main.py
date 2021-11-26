@@ -19,7 +19,7 @@ from pathlib import Path
 from g2p_lstm import FairseqG2P
 
 
-def write_transcribed(transcribed: dict, filename: Path, suffix: str) -> None:
+def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_original: bool) -> None:
     """
     Writes the transcriptions with the original grapheme strings to a file
     named 'filename' extended by 'suffix', for example:
@@ -29,13 +29,15 @@ def write_transcribed(transcribed: dict, filename: Path, suffix: str) -> None:
     :param transcribed: a map with grapheme strings as keys and phonetic transcr. as values
     :param filename: the original filename containing the grapheme strings
     :param suffix: the suffix to label the output file with
+    :param keep_original: write the original grapheme string in the first column
     :return:
     """
     filename_stem = filename.stem
     extended_filename = str(filename.parent) + '/' + filename_stem + suffix + '.tsv'
     with open(extended_filename, 'w') as f:
         for key in transcribed:
-            f.write(key + '\t')
+            if keep_original:
+                f.write(key + '\t')
             f.write(transcribed[key] + '\n')
 
 
@@ -66,40 +68,49 @@ def process_file(filename: Path, word_sep=False) -> dict:
     return transcribed
 
 
-def process_file_or_dir(file_or_dir: Path, out_suffix: str, word_sep=False) -> None:
+def process_file_or_dir(file_or_dir: Path, out_suffix: str, word_sep=False, keep_original=False) -> None:
     print("processing: " + str(file_or_dir))
     if os.path.isdir(file_or_dir):
         for root, dirs, files in os.walk(file_or_dir):
             for filename in files:
+                if filename.startswith('.'):
+                    continue
                 file_path = Path(os.path.join(root, filename))
                 transcribed_content = process_file(file_path, word_sep)
-                write_transcribed(transcribed_content, file_path, out_suffix)
+                write_transcribed(transcribed_content, file_path, out_suffix, keep_original)
     elif os.path.isfile(file_or_dir):
         transcribed_content = process_file(file_or_dir, word_sep)
-        write_transcribed(transcribed_content, file_or_dir, out_suffix)
+        write_transcribed(transcribed_content, file_or_dir, out_suffix, keep_original)
 
 
 def get_arguments():
     parser = argparse.ArgumentParser(description='Transcribe text input to phonetic representation. Provide '
                                                  'an input file or directory, or a string on stdin to transcribe.')
-    parser.add_argument('--infile', '-if', type=Path, help='inputfile or directory')
-    parser.add_argument('--inputstr', '-i', help='input string')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--infile', '-if', type=Path, help='inputfile or directory')
+    group.add_argument('--inputstr', '-i', help='input string')
+    parser.add_argument('--keep', '-k', action='store_true', help='keep original')
+    parser.add_argument('--sep', '-s', action='store_true', help='use word separator')
     return parser.parse_args()
 
 
 def main():
     args = get_arguments()
-
+    keep_original = args.keep
+    word_sep = args.sep
     # we need either an input file or directory, or a string from stdin
     if args.infile is not None:
         if not args.infile.exists():
             logging.error(str(args.infile) + ' does not exist.')
             sys.exit(1)
         else:
-            process_file_or_dir(args.infile, '_transcribed')
+            process_file_or_dir(args.infile, '_transcribed', word_sep, keep_original)
 
     if args.inputstr is not None:
-        print(process_string(args.inputstr, False))
+        if keep_original:
+            print(args.inputstr + ' : ' + process_string(args.inputstr, word_sep))
+        else:
+            print(process_string(args.inputstr, word_sep))
 
 
 if __name__ == '__main__':
