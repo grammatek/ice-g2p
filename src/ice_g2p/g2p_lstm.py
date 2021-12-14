@@ -3,7 +3,7 @@
     Fairseq transformer model.
 """
 
-import os
+import os, sys
 from pathlib import Path
 from fairseq.models.transformer import TransformerModel
 
@@ -17,7 +17,7 @@ DICT_PREFIX = 'dictionaries/ice_pron_dict_'
 class FairseqG2P:
 
     def __init__(self, model_path='/fairseq_models/',
-                 model_file='model-256-.3-s-s.pt', dialect='standard', use_cwd=True):
+                 model_file='model-256-.3-s-s.pt', dialect='standard', use_cwd=True, packaged=False):
         """
         Initializes a Fairseq lstm g2p model according to model_path
         and model_file. If use_cwd=False, be sure to set model_path to
@@ -27,11 +27,15 @@ class FairseqG2P:
         :param dialect: the pronunciation variant to use
         :param use_cwd: if set to False, model_path has to be absolute
         """
-        if use_cwd:
+        if packaged:
+            self.model_path = os.path.join(sys.prefix, "models")
+        elif use_cwd:
             self.model_path = Path(os.getcwd() + model_path + '/' + dialect)
         else:
             self.model_path = model_path + '/' + dialect
         self.model_file = model_file
+        print(self.model_path)
+        print(self.model_file)
         self.g2p_model = TransformerModel.from_pretrained(self.model_path, self.model_file)
         self.pron_dict = self.read_prondict(dialect)
 
@@ -63,7 +67,7 @@ class FairseqG2P:
 
     @staticmethod
     def read_prondict(dialect: str) -> dict:
-        dictfile = DICT_PREFIX + dialect + '_clear.csv'
+        dictfile = os.path.join(sys.prefix, DICT_PREFIX + dialect + '_clear.csv')
         prondict = {}
         with open(dictfile) as f:
             content = f.read().splitlines()

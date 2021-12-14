@@ -24,11 +24,11 @@ Example:
 
 __license__ = 'Apache 2.0 (see: LICENSE)'
 
-import syllabification
-import stress
-import tree_builder
+from .syllabification import syllabify_tree_dict
+from .stress import set_stress
+from .tree_builder import build_compound_tree
 
-from entry import PronDictEntry
+from .entry import PronDictEntry
 
 
 def init_pron_dict(dict_file):
@@ -54,15 +54,15 @@ def init_pron_dict_from_dict(dict_pairs):
 def create_tree_list(pron_dict):
     tree_list = []
     for entry in pron_dict:
-        t = tree_builder.build_compound_tree(entry)
+        t = build_compound_tree(entry)
         tree_list.append(t)
     return tree_list
 
 def syllabify_and_label(pron_dict):
     tree_dict = create_tree_list(pron_dict)
 
-    syllabified = syllabification.syllabify_tree_dict(tree_dict)
-    syllab_with_stress = stress.set_stress(syllabified)
+    syllabified = syllabify_tree_dict(tree_dict)
+    syllab_with_stress = set_stress(syllabified)
     return syllab_with_stress
 
 
