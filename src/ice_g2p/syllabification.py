@@ -32,8 +32,8 @@ Thus it is important to perform compound analysis before applying the core sylla
 
 """
 
-import syllable
-import dictionaries
+from . import syllable
+from . import dictionaries
 
 # each syllable has a vowel as a nucleus. 'e' and 'o' aren't actually in the inventory, regardless of if we
 # are using SAMPA or IPA, but we need to be able to identify 'ei' and 'ou' from the first character only, so those

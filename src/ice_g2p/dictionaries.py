@@ -1,9 +1,9 @@
-
-DICTIONARY_FILE = 'dictionaries/ice_pron_dict_standard_clear.csv'
-HEAD_FILE = 'data/head_map.csv'
-MODIFIER_FILE = 'data/modifier_map.csv'
-VOWELS_FILE = 'data/vowels_sampa.txt'
-CONS_CLUSTERS_FILE = 'data/cons_clusters_sampa.txt'
+import os, sys
+DICTIONARY_FILE = os.path.join(sys.prefix, 'dictionaries/ice_pron_dict_standard_clear.csv')
+HEAD_FILE = os.path.join(sys.prefix, 'data/head_map.csv')
+MODIFIER_FILE = os.path.join(sys.prefix, 'data/modifier_map.csv')
+VOWELS_FILE = os.path.join(sys.prefix, 'data/vowels_sampa.txt')
+CONS_CLUSTERS_FILE = os.path.join(sys.prefix, 'data/cons_clusters_sampa.txt')
 
 
 def read_map(filename):
