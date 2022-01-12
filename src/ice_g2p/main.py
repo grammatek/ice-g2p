@@ -16,8 +16,8 @@ import logging
 import argparse
 from pathlib import Path
 
-import syllab_stress_processing as syllabify
-from g2p_lstm import FairseqG2P
+from transcriber import Transcriber
+from transcriber import G2P_METHOD
 
 
 def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_original: bool) -> None:
@@ -42,31 +42,13 @@ def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_origi
             f.write(transcribed[key] + '\n')
 
 
-def extract_transcript(syllabified: list) -> str:
-    result = ''
-    for entr in syllabified:
-        if not result:
-            result += entr.simple_stress_format()
-        else:
-            result += '. ' + entr.simple_stress_format()
-
-    return result
-
-def process_string(input_str: str, syllab=False, use_dict=False, word_sep=False) -> str:
+def process_string(input_str: str, syllab=False, use_dict=False, word_sep=False, lang_detect=False) -> str:
     print('processing: "' + input_str + '"')
-    g2p = FairseqG2P()
-    if syllab:
-        transcr_arr = []
-        for wrd in input_str.split(' '):
-            transcr_arr.append(g2p.transcribe(wrd.strip(), use_dict, False))
-        entries = syllabify.init_pron_dict_from_dict(dict(zip(input_str.split(' '), transcr_arr)))
-        transcribed = extract_transcript(syllabify.syllabify_and_label(entries))
-    else:
-        transcribed = g2p.transcribe(input_str.strip(), use_dict, word_sep)
-    return transcribed
+    g2p = Transcriber(G2P_METHOD.FAIRSEQ, lang_detect)
+    return g2p.transcribe(input_str, syllab, use_dict, word_sep)
 
 
-def process_file(filename: Path, syllab=False, use_dict=True, word_sep=False) -> dict:
+def process_file(filename: Path, syllab=False, use_dict=True, word_sep=False, lang_detect=False) -> dict:
     """
     Transcribes the content of 'filename' line by line
     :param filename: input file to transcribe
@@ -74,20 +56,13 @@ def process_file(filename: Path, syllab=False, use_dict=True, word_sep=False) ->
     :return: a map of grapheme strings and their phonetic transcriptions
     """
     print("processing: " + str(filename))
-    g2p = FairseqG2P()
     with open(filename) as f:
         file_content = f.read().splitlines()
 
+    g2p = Transcriber(G2P_METHOD.FAIRSEQ, lang_detect)
     transcribed = {}
     for line in file_content:
-        if syllab:
-            transcr_arr = []
-            for wrd in line.split(' '):
-                transcr_arr.append(g2p.transcribe(wrd.strip(), use_dict, False))
-            entries = syllabify.init_pron_dict_from_dict(dict(zip(line.split(' '), transcr_arr)))
-            transcribed[line] = extract_transcript(syllabify.syllabify_and_label(entries))
-        else:
-            transcribed[line] = g2p.transcribe(line.strip(), use_dict, word_sep)
+        transcribed[line] = g2p.transcribe(line, syllab, use_dict, word_sep, lang_detect)
 
     return transcribed
 
@@ -121,6 +96,7 @@ def get_arguments():
 
 
 def main():
+    # TODO: add arguments for lang detect
     args = get_arguments()
     keep_original = args.keep
     word_sep = args.sep
