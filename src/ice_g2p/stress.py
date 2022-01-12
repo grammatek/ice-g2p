@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import entry
+from . import entry
 
 # max number of syllables for a word only having primary stress on first syllable, other syllables without stress
 ONE_STRESS_SYLL_COUNT = 4

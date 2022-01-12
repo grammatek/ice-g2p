@@ -16,8 +16,8 @@ import logging
 import argparse
 from pathlib import Path
 
-import syllab_stress_processing as syllabify
-from g2p_lstm import FairseqG2P
+from . import syllab_stress_processing as syllabify
+from .g2p_lstm import FairseqG2P
 
 
 def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_original: bool) -> None:
