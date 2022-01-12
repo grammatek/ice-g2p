@@ -1,6 +1,6 @@
 import unittest
 import os
-from src.g2p_lstm import FairseqG2P
+from src.ice_g2p.g2p_lstm import FairseqG2P
 
 class TestG2P_LSTM(unittest.TestCase):
 
@@ -15,7 +15,7 @@ class TestG2P_LSTM(unittest.TestCase):
     def test_word_sep_transcribe(self):
         test_string = 'hlaupa í burtu'
         g2p = FairseqG2P()
-        transcribed = g2p.transcribe(test_string, True)
+        transcribed = g2p.transcribe(test_string, True, True)
         self.assertEqual('l_0 9i: p a-i:-p Y r_0 t Y', transcribed)
 
 

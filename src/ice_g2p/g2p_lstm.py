@@ -16,8 +16,8 @@ DICT_PREFIX = 'dictionaries/ice_pron_dict_'
 
 class FairseqG2P:
 
-    def __init__(self, model_path='/fairseq_models/',
-                 model_file='model-256-.3-s-s.pt', dialect='standard', use_cwd=True, packaged=False):
+    def __init__(self, model_path='./fairseq_models/',
+                 model_file='model-256-.3-s-s.pt', dialect='standard', packaged=False):
         """
         Initializes a Fairseq lstm g2p model according to model_path
         and model_file. If use_cwd=False, be sure to set model_path to
@@ -29,10 +29,8 @@ class FairseqG2P:
         """
         if packaged:
             self.model_path = os.path.join(sys.prefix, "models")
-        elif use_cwd:
-            self.model_path = Path(os.getcwd() + model_path + '/' + dialect)
         else:
-            self.model_path = model_path + '/' + dialect
+            self.model_path = model_path + dialect
         self.model_file = model_file
         print(self.model_path)
         print(self.model_file)
@@ -67,7 +65,7 @@ class FairseqG2P:
 
     @staticmethod
     def read_prondict(dialect: str) -> dict:
-        dictfile = os.path.join(sys.prefix, DICT_PREFIX + dialect + '_clear.csv')
+        dictfile = DICT_PREFIX + dialect + '_clear.csv'
         prondict = {}
         with open(dictfile) as f:
             content = f.read().splitlines()
