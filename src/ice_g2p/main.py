@@ -62,12 +62,12 @@ def process_file(filename: Path, syllab=False, use_dict=True, word_sep=False, la
     g2p = Transcriber(G2P_METHOD.FAIRSEQ, lang_detect)
     transcribed = {}
     for line in file_content:
-        transcribed[line] = g2p.transcribe(line, syllab, use_dict, word_sep, lang_detect)
+        transcribed[line] = g2p.transcribe(line, syllab, use_dict, word_sep)
 
     return transcribed
 
 
-def process_file_or_dir(file_or_dir: Path, out_suffix: str, syllab=False, use_dict=False, word_sep=False, keep_original=False) -> None:
+def process_file_or_dir(file_or_dir: Path, out_suffix: str, syllab=False, use_dict=False, word_sep=False, keep_original=False, lang_detect=False) -> None:
     print("processing: " + str(file_or_dir))
     if os.path.isdir(file_or_dir):
         for root, dirs, files in os.walk(file_or_dir):
@@ -75,10 +75,10 @@ def process_file_or_dir(file_or_dir: Path, out_suffix: str, syllab=False, use_di
                 if filename.startswith('.'):
                     continue
                 file_path = Path(os.path.join(root, filename))
-                transcribed_content = process_file(file_path, syllab, use_dict, word_sep)
+                transcribed_content = process_file(file_path, syllab, use_dict, word_sep, lang_detect)
                 write_transcribed(transcribed_content, file_path, out_suffix, keep_original)
     elif os.path.isfile(file_or_dir):
-        transcribed_content = process_file(file_or_dir, use_dict, word_sep)
+        transcribed_content = process_file(file_or_dir, syllab, use_dict, word_sep, lang_detect)
         write_transcribed(transcribed_content, file_or_dir, out_suffix, keep_original)
 
 
@@ -92,29 +92,30 @@ def get_arguments():
     parser.add_argument('--sep', '-s', action='store_true', help='use word separator')
     parser.add_argument('--dict', '-d', action='store_true', help='use pronunciation dictionary')
     parser.add_argument('--syll', '-y', action='store_true', help='add syllabification and stree labeling')
+    parser.add_argument('--langdetect', '-l', action='store_true', help='use word-based language detection')
     return parser.parse_args()
 
 
 def main():
-    # TODO: add arguments for lang detect
     args = get_arguments()
     keep_original = args.keep
     word_sep = args.sep
     use_dict = args.dict
     syllab = args.syll
+    lang_detect = args.langdetect
     # we need either an input file or directory, or a string from stdin
     if args.infile is not None:
         if not args.infile.exists():
             logging.error(str(args.infile) + ' does not exist.')
             sys.exit(1)
         else:
-            process_file_or_dir(args.infile, '_transcribed', syllab, use_dict, word_sep, keep_original)
+            process_file_or_dir(args.infile, '_transcribed', syllab, use_dict, word_sep, keep_original, lang_detect)
 
     if args.inputstr is not None:
         if keep_original:
-            print(args.inputstr + ' : ' + process_string(args.inputstr, syllab, use_dict, word_sep))
+            print(args.inputstr + ' : ' + process_string(args.inputstr, syllab, use_dict, word_sep, lang_detect))
         else:
-            print(process_string(args.inputstr, syllab, use_dict, word_sep))
+            print(process_string(args.inputstr, syllab, use_dict, word_sep, lang_detect))
 
 
 if __name__ == '__main__':
