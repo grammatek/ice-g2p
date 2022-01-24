@@ -22,10 +22,10 @@ Characters allowed: _[aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]_. If other c
 
 To transcribe text, currently two main options are available, direct from stdin to stdout or from file or a collection of files (directory) 
 
-    %python src/main.py -i 'hljóðrita þetta takk'
+    %python src/ice-g2p/main.py -i 'hljóðrita þetta takk'
 	l_0 j ou D r I t a T E h t a t_h a h k
 
-	%python src/main.py -if file_to_transcribe.txt
+	%python src/ice-g2p/main.py -if file_to_transcribe.txt
 
 If the input comes from stdin, the output is written to stdout. Input from file(s) is written to file(s) with the same name with the suffix '_transcribed.tsv'. The files are transcribed line by line and written out correspondingly. 
 
@@ -45,10 +45,10 @@ The options available:
 Using the `-k` flag keeps the original grapheme strings and for file input/output writes the original strings in the first column of the tab separated output file, and the phonetic transcription in the second one.
 The `-s`flag adds a word separator to the transcription. With the `-d` flag all tokens are first looked up in an existing pronunciation dictionary, the automatic g2p is then only a fallback for words not contained in the dictionary. With the `-y` flag syllabification and stress labeling is added to the transcription:
 
-    %python src/main.py -i 'hljóðrita þetta takk' -k -s
+    %python src/ice-g2p/main.py -i 'hljóðrita þetta takk' -k -s
 	hljóðrita þetta takk : l_0 j ou D r I t a-T E h t a-t_h a h k
 
-	%python src/main.py -i 'hljóðrita þetta takk' -k -y
+	%python src/ice-g2p/main.py -i 'hljóðrita þetta takk' -k -y
 	hljóðrita þetta takk : l_0 j ou1 D. r I0. t a0. T E1 h. t a0. t_h a1 h k
 
 
