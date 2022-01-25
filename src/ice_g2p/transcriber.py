@@ -24,7 +24,7 @@ class Transcriber:
     def init_g2p(self, g2p_method: G2P_METHOD, lang_detect=False):
         if g2p_method == G2P_METHOD.FAIRSEQ:
             if lang_detect:
-                return FairseqG2P(dialect='english')
+                return FairseqG2P(dialect='english', alphabet='[aåäbcdefghijklmnoöpqrstuüvwxyz]')
             else:
                 return FairseqG2P()
         else:
@@ -58,7 +58,6 @@ class Transcriber:
             return self.g2p.transcribe(input_str.strip(), use_dict, word_sep)
         else:
             return self.g2p_foreign.transcribe(input_str.strip(), use_dict, word_sep)
-
 
     # Use trigrams to estimate the probability of a word being Icelandic or not
     def is_icelandic(self, word: str) -> bool:
