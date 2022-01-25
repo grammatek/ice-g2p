@@ -17,7 +17,7 @@ DICT_PREFIX = 'dictionaries/ice_pron_dict_'
 class FairseqG2P:
 
     def __init__(self, model_path='./fairseq_models/',
-                 model_file='model-256-.3-s-s.pt', dialect='standard', packaged=False):
+                 model_file='model-256-.3-s-s.pt', dialect='standard', alphabet=ALPHABET, packaged=False):
         """
         Initializes a Fairseq lstm g2p model according to model_path
         and model_file. If use_cwd=False, be sure to set model_path to
@@ -35,6 +35,7 @@ class FairseqG2P:
         print(self.model_path)
         print(self.model_file)
         self.g2p_model = TransformerModel.from_pretrained(self.model_path, self.model_file)
+        self.alphabet = alphabet
         self.pron_dict = self.read_prondict(dialect)
 
     def transcribe(self, text, use_dict=False, sep=False) -> str:
@@ -52,8 +53,8 @@ class FairseqG2P:
                 if transcr:
                     transcribed_arr.append(transcr)
                     continue
-            if set(wrd).difference(ALPHABET):
-                print(wrd + ' contains non valid character(s) ' + str(set(wrd).difference(ALPHABET)) + ', skipping transcription.')
+            if set(wrd).difference(self.alphabet):
+                print(wrd + ' contains non valid character(s) ' + str(set(wrd).difference(self.alphabet)) + ', skipping transcription.')
                 continue
             transcribed_arr.append(self.g2p_model.translate(' '.join(wrd)))
         if sep:
