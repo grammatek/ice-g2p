@@ -41,6 +41,7 @@ The options available:
   	--sep, -s             use word separator
 	--dict, -d            use pronunciation dictionary
 	--syll, -y            add syllabification and stress labeling
+	--langdetect, -l      use word-based language detection
 
 Using the `-k` flag keeps the original grapheme strings and for file input/output writes the original strings in the first column of the tab separated output file, and the phonetic transcription in the second one.
 The `-s`flag adds a word separator to the transcription. With the `-d` flag all tokens are first looked up in an existing pronunciation dictionary, the automatic g2p is then only a fallback for words not contained in the dictionary. With the `-y` flag syllabification and stress labeling is added to the transcription:
@@ -51,6 +52,13 @@ The `-s`flag adds a word separator to the transcription. With the `-d` flag all 
 	%python src/ice-g2p/main.py -i 'hljóðrita þetta takk' -k -y
 	hljóðrita þetta takk : l_0 j ou1 D. r I0. t a0. T E1 h. t a0. t_h a1 h k
 
+Using the `-l` flag allows for word-based language detection, where words considered foreign are transcribed by an LSTM trained on English words instead of Icelandic:
+
+    %python src/ice-g2p/main.py -i 'hljóðrita þetta please'
+	l_0 j ou D r I t a T E h t a t_h a p_h l E: a s E
+	
+	%python src/ice-g2p/main.py -i 'hljóðrita þetta please' -l
+	l_0 j ou D r I t a T E h t a p_h l i: s
 
 ## Trouble shooting & inquiries
 
