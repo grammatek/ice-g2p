@@ -16,7 +16,7 @@ Clone the repository and create a virtual environment in the project root direct
 
 ## Command line interface
 
-**The input strings/texts need to be normalized. The module only handles lowercase characters from the Icelandic alphabet, no punctuation or other characters**
+**The input strings/texts need to be normalized. The module only handles lowercase characters from the Icelandic alphabet, no punctuation or other characters, unless language detection is enabled (see Flags)**
 
 Characters allowed: _[aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]_. If other characters are found in the input, the transcription of the respective token is skipped and a notice written to stdout.
 
@@ -52,7 +52,7 @@ The `-s`flag adds a word separator to the transcription. With the `-d` flag all 
 	%python src/ice-g2p/main.py -i 'hljóðrita þetta takk' -k -y
 	hljóðrita þetta takk : l_0 j ou1 D. r I0. t a0. T E1 h. t a0. t_h a1 h k
 
-Using the `-l` flag allows for word-based language detection, where words considered foreign are transcribed by an LSTM trained on English words instead of Icelandic:
+Using the `-l` flag allows for word-based language detection, where words considered foreign are transcribed by an LSTM trained on English words instead of Icelandic. If this flag is used, the module can handle common non-Icelandic characters, including all of the English alphabet:
 
     %python src/ice-g2p/main.py -i 'hljóðrita þetta please'
 	l_0 j ou D r I t a T E h t a t_h a p_h l E: a s E
