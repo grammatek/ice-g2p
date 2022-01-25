@@ -91,7 +91,7 @@ def get_arguments():
     parser.add_argument('--keep', '-k', action='store_true', help='keep original')
     parser.add_argument('--sep', '-s', action='store_true', help='use word separator')
     parser.add_argument('--dict', '-d', action='store_true', help='use pronunciation dictionary')
-    parser.add_argument('--syll', '-y', action='store_true', help='add syllabification and stree labeling')
+    parser.add_argument('--syll', '-y', action='store_true', help='add syllabification and stress labeling')
     parser.add_argument('--langdetect', '-l', action='store_true', help='use word-based language detection')
     return parser.parse_args()
 
