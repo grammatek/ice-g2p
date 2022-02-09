@@ -36,7 +36,7 @@ class Transcriber:
         for wrd in input_str.split(' '):
             transcr_arr.append(self.transcribe_lang(wrd.strip(), use_dict, word_sep, self.is_icelandic(wrd.strip())))
         if syllab:
-            entries = syllabify.init_pron_dict_from_dict(dict(zip(input_str.split(' '), transcr_arr)))
+            entries = syllabify.init_pron_dict_from_tuples(list(zip(input_str.split(' '), transcr_arr)))
             transcribed = self.extract_transcript(syllabify.syllabify_and_label(entries))
         else:
             transcribed = ' '.join(transcr_arr)
