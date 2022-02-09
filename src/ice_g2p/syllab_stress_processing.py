@@ -43,10 +43,13 @@ def init_pron_dict(dict_file):
     return pron_dict
 
 
-def init_pron_dict_from_dict(dict_pairs):
+def init_pron_dict_from_tuples(tuples: list):
     pron_dict = []
-    for word in dict_pairs:
-        entry = PronDictEntry(word, dict_pairs[word])
+    for t in tuples:
+        if len(t) != 2:
+            # each tuple should consist of ('word', 'transcr')
+            continue
+        entry = PronDictEntry(t[0], t[1])
         pron_dict.append(entry)
     return pron_dict
 
@@ -57,6 +60,7 @@ def create_tree_list(pron_dict):
         t = build_compound_tree(entry)
         tree_list.append(t)
     return tree_list
+
 
 def syllabify_and_label(pron_dict):
     tree_dict = create_tree_list(pron_dict)
@@ -72,8 +76,8 @@ def syllabify_and_label_dict(dictfile):
 
 
 def syllabify_and_label_from_lists(word_list, transcr_list):
-    pron_dict_pairs = dict(zip(word_list, transcr_list))
-    pron_dict = init_pron_dict_from_dict(pron_dict_pairs)
+    pron_dict_pairs = list(zip(word_list, transcr_list))
+    pron_dict = init_pron_dict_from_tuples(pron_dict_pairs)
     return syllabify_and_label(pron_dict)
 
 
@@ -114,7 +118,6 @@ def main():
             f.write(entry.syllable_format())
             f.write('\n')
     """
-
 
 
 if __name__ == '__main__':
