@@ -1,9 +1,10 @@
 import math
 from nltk import trigrams
 from enum import Enum
-import syllab_stress_processing as syllabify
-from g2p_lstm import FairseqG2P
-from trigrams import ice_grams, eng_grams
+
+from . import syllab_stress_processing as syllabify
+from .g2p_lstm import FairseqG2P
+from .trigrams import ice_grams, eng_grams
 
 
 class G2P_METHOD(Enum):

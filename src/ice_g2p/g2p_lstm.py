@@ -4,19 +4,20 @@
 """
 
 import os, sys
-from pathlib import Path
 from fairseq.models.transformer import TransformerModel
 
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(PROJECT_ROOT, 'resources/fairseq_models/')
 # if word separation is required in transcribed output
 # use this separator
 WORD_SEP = '-'
 ALPHABET = '[aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]'
-DICT_PREFIX = 'dictionaries/ice_pron_dict_'
+DICT_PREFIX = os.path.join(PROJECT_ROOT, 'resources/dictionaries/ice_pron_dict_')
 
 
 class FairseqG2P:
 
-    def __init__(self, model_path='./fairseq_models/',
+    def __init__(self, model_path=MODEL_DIR,
                  model_file='model-256-.3-s-s.pt', dialect='standard', alphabet=ALPHABET, packaged=False):
         """
         Initializes a Fairseq lstm g2p model according to model_path

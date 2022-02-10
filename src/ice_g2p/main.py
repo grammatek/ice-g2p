@@ -16,8 +16,8 @@ import logging
 import argparse
 from pathlib import Path
 
-from transcriber import Transcriber
-from transcriber import G2P_METHOD
+from .transcriber import Transcriber
+from .transcriber import G2P_METHOD
 
 
 def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_original: bool) -> None:
