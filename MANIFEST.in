@@ -1,0 +1,4 @@
+include pyproject.toml
+recursive-include src/ice_g2p *.csv 
+recursive-include src/ice_g2p *.txt 
+recursive-include src/ice_g2p *.pt

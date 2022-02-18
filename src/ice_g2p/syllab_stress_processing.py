@@ -24,11 +24,11 @@ Example:
 
 __license__ = 'Apache 2.0 (see: LICENSE)'
 
-from syllabification import syllabify_tree_dict
-from stress import set_stress
-from tree_builder import build_compound_tree
+from ice_g2p.syllabification import syllabify_tree_dict
+from ice_g2p.stress import set_stress
+from ice_g2p.tree_builder import build_compound_tree
 
-from entry import PronDictEntry
+from ice_g2p.entry import PronDictEntry
 
 
 def init_pron_dict(dict_file):
