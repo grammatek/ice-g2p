@@ -24,7 +24,7 @@ class Syllable:
     def append(self, phone_str):
         self.content += phone_str + ' '
 
-    def append_before(self, phone_str):
+    def prepend(self, phone_str):
         self.content = phone_str + ' ' + self.content
 
     def last_phones(self, number=1):

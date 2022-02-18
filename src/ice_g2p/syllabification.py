@@ -98,18 +98,18 @@ def syllabify_final(entry):
         if ind > 0 and syll.content[0] in VOWELS:
             if prev_syll.cons_cluster:
                 # copy cons_cluster to next syllable
-                syll.append_before(prev_syll.cons_cluster)
+                syll.prepend(prev_syll.cons_cluster)
                 prev_syll.remove_cluster()
                 entry.update_syllables(ind, prev_syll, syll)
             elif prev_syll.last_phones() not in VOWELS:
                 # handle 'jE' (=é) as one vowel
                 if prev_syll.endswith(CONS_J) and (syll.startswith(VOWEL_E_SAMPA) or syll.startswith(VOWEL_E_IPA)):
                     phone = prev_syll.last_phones(1)
-                    syll.append_before(phone)
+                    syll.prepend(phone)
                     prev_syll.content = prev_syll.content[:-(len(phone)+1)]
                 else:
                     phone = prev_syll.last_phones()
-                    syll.append_before(phone)
+                    syll.prepend(phone)
                     prev_syll.content = prev_syll.content[:-(len(phone)+1)]
                 entry.update_syllables(ind, prev_syll, syll)
 
