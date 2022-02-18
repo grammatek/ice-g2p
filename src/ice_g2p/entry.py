@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from syllabification import VOWELS
+from ice_g2p.syllabification import VOWELS
 
 class PronDictEntry:
     """
@@ -96,9 +96,9 @@ class PronDictEntry:
                     p = p + str(syll.stress)
                 stressed_phones.append(p)
 
-            sylls += ' '.join(stressed_phones) + '. '
+            sylls += ' '.join(stressed_phones) + ' . '
 
-        return sylls.strip()[:-1]
+        return sylls.strip()[:-2]
 
     def simple_stress_format(self):
         return self.stress_format()

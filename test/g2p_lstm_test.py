@@ -1,7 +1,7 @@
 import unittest
 import os
-from src.ice_g2p.g2p_lstm import FairseqG2P
-from src.ice_g2p.transcriber import Transcriber
+from ice_g2p.g2p_lstm import FairseqG2P
+from ice_g2p.transcriber import Transcriber
 
 class TestG2P_LSTM(unittest.TestCase):
 

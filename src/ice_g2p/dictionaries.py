@@ -1,9 +1,11 @@
 import os, sys
-DICTIONARY_FILE = './dictionaries/ice_pron_dict_standard_clear.csv'
-HEAD_FILE = './data/head_map.csv'
-MODIFIER_FILE = './data/modifier_map.csv'
-VOWELS_FILE = './data/vowels_sampa.txt'
-CONS_CLUSTERS_FILE = './data/cons_clusters_sampa.txt'
+
+package_path = os.path.dirname(os.path.abspath(__file__))
+DICTIONARY_FILE = os.path.join(package_path, 'dictionaries/ice_pron_dict_standard_clear.csv')
+HEAD_FILE = os.path.join(package_path, 'data/head_map.csv')
+MODIFIER_FILE = os.path.join(package_path, 'data/modifier_map.csv')
+VOWELS_FILE = os.path.join(package_path, 'data/vowels_sampa.txt')
+CONS_CLUSTERS_FILE = os.path.join(package_path, 'data/cons_clusters_sampa.txt')
 
 
 def read_map(filename):
