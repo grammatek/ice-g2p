@@ -1,9 +1,9 @@
 import math
 from nltk import trigrams
 from enum import Enum
-import syllab_stress_processing as syllabify
-from g2p_lstm import FairseqG2P
-from trigrams import ice_grams, eng_grams
+import ice_g2p.syllab_stress_processing as syllabify
+from ice_g2p.g2p_lstm import FairseqG2P
+from ice_g2p.trigrams import ice_grams, eng_grams
 
 
 class G2P_METHOD(Enum):
@@ -21,7 +21,7 @@ class Transcriber:
         else:
             self.lang_detect = False
 
-    def init_g2p(self, g2p_method: G2P_METHOD, lang_detect=False):
+    def init_g2p(self, g2p_method: G2P_METHOD, lang_detect: bool=False):
         if g2p_method == G2P_METHOD.FAIRSEQ:
             if lang_detect:
                 return FairseqG2P(dialect='english', alphabet='[aåäbcdefghijklmnoöpqrstuüvwxyz]')
