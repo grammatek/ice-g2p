@@ -52,11 +52,15 @@ class Transcriber:
             entries = syllabify.init_pron_dict_from_tuples(list(zip(input_str.split(' '), transcr_arr)))
             syllabified_dict = syllabify.syllabify_and_label(entries)
             transcribed_utt = set_stress([syllabified_dict[wrd] for wrd in input_str.split(' ')])
-            transcribed = self.extract_transcript(transcribed_utt)
+            transcribed = self.extract_transcript(transcribed_utt, word_sep=word_sep)
         else:
             if word_sep:
-                f' {word_sep} '.join(transcr_arr)
-            transcribed = ' '.join(transcr_arr)
+                if type(word_sep) == str:
+                    transcribed = f' {word_sep} '.join(transcr_arr)
+                else:
+                    transcribed = "-".join(transcr_arr)
+            else:
+                transcribed = ' '.join(transcr_arr)
 
         return transcribed
 
