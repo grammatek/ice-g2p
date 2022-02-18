@@ -146,12 +146,12 @@ def syllabify_tree_dict(tree_dict):
     :return: a list of syllabified PronDictEntries. Note that the returned list does NOT contain tree elements any more,
     but simple PronDictEntries.
     """
-    syllabified = []
-    for t in tree_dict:
+    syllabified = {}
+    for word, t in tree_dict.items():
         syllables = []
         syllabify_tree(t, syllables)
         t.elem.syllables = syllables
-        syllabified.append(t.elem)
+        syllabified[word] = t.elem
 
     return syllabified
 
