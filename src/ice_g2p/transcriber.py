@@ -4,6 +4,7 @@ from enum import Enum
 import ice_g2p.syllab_stress_processing as syllabify
 from ice_g2p.g2p_lstm import FairseqG2P
 from ice_g2p.trigrams import ice_grams, eng_grams
+from ice_g2p.stress import set_stress
 
 
 class G2P_METHOD(Enum):
@@ -13,13 +14,20 @@ class G2P_METHOD(Enum):
 
 class Transcriber:
 
-    def __init__(self, g2p_method=G2P_METHOD.FAIRSEQ, lang_detect=False):
+    def __init__(self, g2p_method=G2P_METHOD.FAIRSEQ, lang_detect=False, use_dict=False, use_syll=False):
         self.g2p = self.init_g2p(g2p_method)
+        self.use_dict = use_dict
+        self.use_syll = use_syll
         if lang_detect:
             self.g2p_foreign = self.init_g2p(g2p_method, lang_detect)
             self.lang_detect = True
         else:
             self.lang_detect = False
+        if use_dict:
+            from ice_g2p.dictionaries import get_dictionary
+            self.dictionary = get_dictionary()
+        else:
+            self.dictionary = None
 
     def init_g2p(self, g2p_method: G2P_METHOD, lang_detect: bool=False):
         if g2p_method == G2P_METHOD.FAIRSEQ:
@@ -30,26 +38,38 @@ class Transcriber:
         else:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
 
-    def transcribe(self, input_str: str, syllab=False, use_dict=False, word_sep=False) -> str:
-        # TODO: manage word_sep
+    def transcribe(self, input_str: str, use_syll=False, use_dict=False, word_sep=None) -> str:
         transcr_arr = []
         for wrd in input_str.split(' '):
-            transcr_arr.append(self.transcribe_lang(wrd.strip(), use_dict, word_sep, self.is_icelandic(wrd.strip())))
-        if syllab:
+            if self.dictionary and wrd in self.dictionary:
+                transcr_arr.append(self.dictionary[wrd])
+            else:
+                entry = self.transcribe_lang(wrd.strip(), use_dict, word_sep, self.is_icelandic(wrd.strip()))
+                if self.dictionary:
+                    self.dictionary[wrd] = entry
+                transcr_arr.append(entry)
+        if self.use_syll or use_syll:
             entries = syllabify.init_pron_dict_from_tuples(list(zip(input_str.split(' '), transcr_arr)))
-            transcribed = self.extract_transcript(syllabify.syllabify_and_label(entries))
+            syllabified_dict = syllabify.syllabify_and_label(entries)
+            transcribed_utt = set_stress([syllabified_dict[wrd] for wrd in input_str.split(' ')])
+            transcribed = self.extract_transcript(transcribed_utt)
         else:
+            if word_sep:
+                f' {word_sep} '.join(transcr_arr)
             transcribed = ' '.join(transcr_arr)
 
         return transcribed
 
-    def extract_transcript(self, syllabified: list) -> str:
+    def extract_transcript(self, syllabified: list, word_sep: str=None) -> str:
         result = ''
         for entr in syllabified:
             if not result:
                 result += entr.simple_stress_format()
             else:
-                result += '. ' + entr.simple_stress_format()
+                if word_sep:
+                    result += f" {word_sep} " + entr.simple_stress_format()
+                else:
+                    result += ' . ' + entr.simple_stress_format()
 
         return result
 

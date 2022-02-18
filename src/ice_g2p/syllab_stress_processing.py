@@ -25,7 +25,6 @@ Example:
 __license__ = 'Apache 2.0 (see: LICENSE)'
 
 from ice_g2p.syllabification import syllabify_tree_dict
-from ice_g2p.stress import set_stress
 from ice_g2p.tree_builder import build_compound_tree
 
 from ice_g2p.entry import PronDictEntry
@@ -35,39 +34,31 @@ def init_pron_dict(dict_file):
     with open(dict_file) as f:
         dict_list = f.read().splitlines()
 
-    pron_dict = []
-    for line in dict_list:
-        word, transcr = line.split('\t')
-        entry = PronDictEntry(word, transcr)
-        pron_dict.append(entry)
-    return pron_dict
+    tuples = [tuple(line.split('\t')) for line in dict_list]
+    return init_pron_dict_from_tuples(tuples)
 
 
 def init_pron_dict_from_tuples(tuples: list):
-    pron_dict = []
-    for t in tuples:
-        if len(t) != 2:
-            # each tuple should consist of ('word', 'transcr')
-            continue
-        entry = PronDictEntry(t[0], t[1])
-        pron_dict.append(entry)
+    pron_dict = {}
+    for word, transcr in tuples:
+        entry = PronDictEntry(word, transcr)
+        pron_dict[word]=entry
     return pron_dict
 
 
-def create_tree_list(pron_dict):
-    tree_list = []
-    for entry in pron_dict:
+def create_tree_dict(pron_dict):
+    tree_dict = {}
+    for word, entry in pron_dict.items():
         t = build_compound_tree(entry)
-        tree_list.append(t)
-    return tree_list
+        tree_dict[word] = t
+    return tree_dict
 
 
 def syllabify_and_label(pron_dict):
-    tree_dict = create_tree_list(pron_dict)
+    tree_dict = create_tree_dict(pron_dict)
 
     syllabified = syllabify_tree_dict(tree_dict)
-    syllab_with_stress = set_stress(syllabified)
-    return syllab_with_stress
+    return syllabified
 
 
 def syllabify_and_label_dict(dictfile):
