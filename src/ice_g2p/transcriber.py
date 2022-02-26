@@ -38,17 +38,18 @@ class Transcriber:
         else:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
 
-    def transcribe(self, input_str: str, use_syll=False, use_dict=False, word_sep=None) -> str:
+    def transcribe(self, input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep=False) -> str:
+        # TODO: manage word_sep
         transcr_arr = []
         for wrd in input_str.split(' '):
-            if self.dictionary and wrd in self.dictionary:
-                transcr_arr.append(self.dictionary[wrd])
+            if icelandic:
+                # a word labelled as Icelandic will be sent to automatic lang detection
+                transcr_arr.append(self.transcribe_lang(wrd.strip(), use_dict, word_sep, self.is_icelandic(wrd.strip())))
             else:
-                entry = self.transcribe_lang(wrd.strip(), use_dict, word_sep, self.is_icelandic(wrd.strip()))
-                if self.dictionary:
-                    self.dictionary[wrd] = entry
-                transcr_arr.append(entry)
-        if self.use_syll or use_syll:
+                # word labelled as not Icelandic, will be sent directly to foreign transcription model
+                transcr_arr.append(
+                    self.transcribe_lang(wrd.strip(), use_dict, word_sep, False))
+        if syllab:
             entries = syllabify.init_pron_dict_from_tuples(list(zip(input_str.split(' '), transcr_arr)))
             syllabified_dict = syllabify.syllabify_and_label(entries)
             transcribed_utt = set_stress([syllabified_dict[wrd] for wrd in input_str.split(' ')])
