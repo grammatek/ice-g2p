@@ -39,7 +39,6 @@ class Transcriber:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
 
     def transcribe(self, input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep=False) -> str:
-        # TODO: manage word_sep
         transcr_arr = []
         for wrd in input_str.split(' '):
             if icelandic:
