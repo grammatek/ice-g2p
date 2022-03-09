@@ -22,9 +22,10 @@ class Transcriber:
             self.g2p_foreign = self.init_g2p(g2p_method, lang_detect)
             self.lang_detect = True
         else:
+            self.g2p_foreign = None
             self.lang_detect = False
         if use_dict:
-            from ice_g2p.dictionaries import get_dictionary
+            from dictionaries import get_dictionary
             self.dictionary = get_dictionary()
         else:
             self.dictionary = None
@@ -78,7 +79,7 @@ class Transcriber:
         return result
 
     def transcribe_lang(self, input_str: str, use_dict=False, word_sep=False, icelandic=True) -> str:
-        if icelandic:
+        if icelandic or self.g2p_foreign is None:
             return self.g2p.transcribe(input_str.strip(), use_dict, word_sep)
         else:
             return self.g2p_foreign.transcribe(input_str.strip(), use_dict, word_sep)

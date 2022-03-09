@@ -3,8 +3,7 @@
     Fairseq transformer model.
 """
 
-import os, sys
-from pathlib import Path
+import os
 from fairseq.models.transformer import TransformerModel
 
 # if word separation is required in transcribed output

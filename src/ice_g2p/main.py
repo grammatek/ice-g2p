@@ -44,8 +44,9 @@ def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_origi
 
 def process_string(input_str: str, syllab=False, use_dict=False, word_sep=False, lang_detect=False) -> str:
     print('processing: "' + input_str + '"')
+    print('syllabify: ' + str(syllab))
     g2p = Transcriber(G2P_METHOD.FAIRSEQ, lang_detect)
-    return g2p.transcribe(input_str, syllab, use_dict, word_sep)
+    return g2p.transcribe(input_str, use_dict, syllab, word_sep)
 
 
 def process_file(filename: Path, syllab=False, use_dict=True, word_sep=False, lang_detect=False) -> dict:
