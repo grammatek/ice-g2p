@@ -25,7 +25,7 @@ class Transcriber:
             self.g2p_foreign = None
             self.lang_detect = False
         if use_dict:
-            from dictionaries import get_dictionary
+            from ice_g2p.dictionaries import get_dictionary
             self.dictionary = get_dictionary()
         else:
             self.dictionary = None
