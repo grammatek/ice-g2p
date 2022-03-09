@@ -1,4 +1,4 @@
-import os, sys
+import os
 
 package_path = os.path.dirname(os.path.abspath(__file__))
 DICTIONARY_FILE = os.path.join(package_path, 'dictionaries/ice_pron_dict_standard_clear.csv')
