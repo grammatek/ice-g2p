@@ -3,6 +3,7 @@
 
 from ice_g2p.syllabification import VOWELS
 
+
 class PronDictEntry:
     """
     Contains information on a pronunciation dict entry and methods to manipulate it
