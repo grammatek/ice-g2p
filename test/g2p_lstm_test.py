@@ -1,11 +1,12 @@
 import unittest
 import os
-from ice_g2p.g2p_lstm import FairseqG2P
-from ice_g2p.transcriber import Transcriber
+from src.ice_g2p.g2p_lstm import FairseqG2P
+from src.ice_g2p.transcriber import Transcriber
 
 class TestG2P_LSTM(unittest.TestCase):
 
     os.chdir(os.path.split(os.getcwd())[0])
+
 
     def test_simple_transcribe(self):
         test_string = 'hlaupa'
@@ -13,11 +14,13 @@ class TestG2P_LSTM(unittest.TestCase):
         transcribed = g2p.transcribe(test_string)
         self.assertEqual('l_0 9i: p a', transcribed)
 
+
     def test_word_sep_transcribe(self):
         test_string = 'hlaupa í burtu í dag'
         g2p = FairseqG2P()
         transcribed = g2p.transcribe(test_string, True, True)
         self.assertEqual('l_0 9i: p a-i:-p Y r_0 t Y-i:-t a: G', transcribed)
+
 
     def test_syllabification(self):
         print("Current working dir: " + os.getcwd())
@@ -26,6 +29,15 @@ class TestG2P_LSTM(unittest.TestCase):
         transcribed = g2p.transcribe(test_string, True, True, True)
         self.assertEqual('l_0 9i:1 . p a0 . i:1 . p Y1 r_0 . t Y0 . i:1 . t a:1 G', transcribed)
 
+
+    def test_cmu_format(self):
+        print("Current working dir: " + os.getcwd())
+        test_string = 'hljóðritaður texti'
+        g2p = Transcriber()
+        # input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep: str=None, cmu=False
+        transcribed = g2p.transcribe(test_string, True, True, True, '', True)
+        print(transcribed)
+        self.assertEqual('("hljóðritaður" nil (((l_0 j ou D ) 1) ((r I ) 0) ((t a ) 0) ((D Y r ) 0))) ("texti" nil (((t_h E k s ) 1) ((t I ) 0)))', transcribed)
 
 if __name__ == '__main__':
     unittest.main()

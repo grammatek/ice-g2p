@@ -39,7 +39,7 @@ class Transcriber:
         else:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
 
-    def transcribe(self, input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep=False) -> str:
+    def transcribe(self, input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep: str=None, cmu=False) -> str:
         transcr_arr = []
         for wrd in input_str.split(' '):
             if icelandic:
@@ -53,7 +53,7 @@ class Transcriber:
             entries = syllabify.init_pron_dict_from_tuples(list(zip(input_str.split(' '), transcr_arr)))
             syllabified_dict = syllabify.syllabify_and_label(entries)
             transcribed_utt = set_stress([syllabified_dict[wrd] for wrd in input_str.split(' ')])
-            transcribed = self.extract_transcript(transcribed_utt, word_sep=word_sep)
+            transcribed = self.extract_transcript(transcribed_utt, cmu, word_sep=word_sep)
         else:
             if word_sep:
                 if type(word_sep) == str:
@@ -65,7 +65,9 @@ class Transcriber:
 
         return transcribed
 
-    def extract_transcript(self, syllabified: list, word_sep: str=None) -> str:
+    def extract_transcript(self, syllabified: list, cmu=False, word_sep: str=None) -> str:
+        if cmu:
+            return self.extract_cmu_transcript(syllabified, word_sep)
         result = ''
         for entr in syllabified:
             if not result:
@@ -78,7 +80,20 @@ class Transcriber:
 
         return result
 
-    def transcribe_lang(self, input_str: str, use_dict=False, word_sep=False, icelandic=True) -> str:
+    def extract_cmu_transcript(self, syllabified: list, word_sep: str=None) -> str:
+        result = ''
+        for entr in syllabified:
+            if not result:
+                result += entr.cmu_format()
+            else:
+                if word_sep:
+                    result += f" {word_sep} " + entr.cmu_format()
+                else:
+                    result += ' ' + entr.cmu_format()
+
+        return result
+
+    def transcribe_lang(self, input_str: str, use_dict=False, word_sep: str=None, icelandic=True) -> str:
         if icelandic or self.g2p_foreign is None:
             return self.g2p.transcribe(input_str.strip(), use_dict, word_sep)
         else:
