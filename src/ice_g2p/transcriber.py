@@ -9,7 +9,7 @@ from ice_g2p.stress import set_stress
 
 class G2P_METHOD(Enum):
     FAIRSEQ = 1
-    THRAX = 2
+    # THRAX = 2 TODO: implement!
 
 
 class Transcriber:
@@ -38,6 +38,19 @@ class Transcriber:
                 return FairseqG2P()
         else:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
+
+    def set_custom_dict(self, custom_dict: dict):
+        """
+        A custom dictionary will be used additionally to the built in dictionary.
+        The custom dictionary, if present, is checked first and thus has priority over the built-in dictionary
+        in the cases where the include the same words.
+        Be careful when using a custom dictionary that it follows the same dialect as selected for the g2p and
+        thus the built-in dictionary.
+
+        :param custom_dict: a dictionary with custom vocabulary and/or transcriptions. Has priority over the
+        built-in dicionary
+        """
+        self.g2p.set_custom_dict(custom_dict)
 
     def transcribe(self, input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep: str=None, cmu=False) -> str:
         transcr_arr = []
