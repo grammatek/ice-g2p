@@ -39,5 +39,18 @@ class TestG2P_LSTM(unittest.TestCase):
         print(transcribed)
         self.assertEqual('("hljóðritaður" nil (((l_0 j ou D ) 1) ((r I ) 0) ((t a ) 0) ((D Y r ) 0))) ("texti" nil (((t_h E k s ) 1) ((t I ) 0)))', transcribed)
 
+    def test_custom_dict(self):
+        custom_dict = self.get_custom_dict()
+        test_string = 'þessi texti en engir aukvisar'
+        g2p = Transcriber()
+        g2p.set_custom_dict(custom_dict)
+        transcribed = g2p.transcribe(test_string, True, True, True, '')
+        print(transcribed)
+
+
+    def get_custom_dict(self):
+        custom = {'texti': 't_h E x s t I', 'engir': '9 N k v I r'}
+        return custom
+
 if __name__ == '__main__':
     unittest.main()
