@@ -38,10 +38,10 @@ def init_pron_dict(dict_file):
     return init_pron_dict_from_tuples(tuples)
 
 
-def init_pron_dict_from_tuples(tuples: list):
+def init_pron_dict_from_tuples(tuples: list, syllab_symbol: str):
     pron_dict = {}
     for word, transcr in tuples:
-        entry = PronDictEntry(word, transcr)
+        entry = PronDictEntry(word, transcr, syllab_symbol=syllab_symbol)
         pron_dict[word]=entry
     return pron_dict
 
