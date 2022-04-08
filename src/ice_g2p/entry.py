@@ -3,6 +3,7 @@
 
 from ice_g2p.syllabification import VOWELS
 
+
 class PronDictEntry:
     """
     Contains information on a pronunciation dict entry and methods to manipulate it
@@ -10,7 +11,7 @@ class PronDictEntry:
     The initialisation of a PronDictEntry object takes a word string and its transcription as parameters.
     """
 
-    def __init__(self, word='', transcription='', reference='', alphabet='SAMPA'):
+    def __init__(self, word='', transcription='', reference='', alphabet='SAMPA', syllab_symbol='.'):
         """
 
         :param word: a dictionary entry (ex: 'dag')
@@ -30,6 +31,7 @@ class PronDictEntry:
         self.entailing_compounds = [] # compounds where this word is one part
         self.frequency = 0
         self.set_phon_symbols(alphabet)
+        self.syllab_symbol = syllab_symbol
 
     def __str__(self):
         return self.word + '\t' + self.gpos + '\t' + self.transcript + '\t' + str(self.syllables)
@@ -79,8 +81,10 @@ class PronDictEntry:
     def dot_format_syllables(self):
         sylls = ''
         for syll in self.syllables:
-            sylls += syll.content.strip() + '.'
-        sylls = sylls[0:-1]
+            sylls += syll.content.strip() + f" {self.syllab_symbol} "
+        if len(sylls) > 3:
+            # strip the last syllab_symbol with spaces from the word
+            sylls = sylls[0:-3]
         return sylls
 
     def syllable_format(self):
@@ -96,7 +100,7 @@ class PronDictEntry:
                     p = p + str(syll.stress)
                 stressed_phones.append(p)
 
-            sylls += ' '.join(stressed_phones) + ' . '
+            sylls += ' '.join(stressed_phones) + f" {self.syllab_symbol} "
 
         return sylls.strip()[:-2]
 

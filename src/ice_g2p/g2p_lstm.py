@@ -3,8 +3,7 @@
     Fairseq transformer model.
 """
 
-import os, sys
-from pathlib import Path
+import os
 from fairseq.models.transformer import TransformerModel
 
 # if word separation is required in transcribed output
@@ -34,10 +33,24 @@ class FairseqG2P:
         self.g2p_model = TransformerModel.from_pretrained(self.model_path, self.model_file)
         self.alphabet = alphabet
         self.pron_dict = self.read_prondict(dialect)
+        self.custom_dict = None
+
+    def set_custom_dict(self, custom_dict: dict):
+        """
+        A custom dictionary will be used additionally to the built in dictionary.
+        The custom dictionary, if present, is checked first and thus has priority over the built-in dictionary
+        in the cases where the include the same words.
+        Be careful when using a custom dictionary that it follows the same dialect as selected for the g2p and
+        thus the built-in dictionary.
+
+        :param custom_dict: a dictionary with custom vocabulary and/or transcriptions. Has priority over the
+        built-in dicionary
+        """
+        self.custom_dict = custom_dict
 
     def transcribe(self, text, use_dict=False, sep=False) -> str:
         """
-            Transcribes text according to the initialized transformer model.
+        Transcribes text according to the initialized transformer model.
         Text can be a single word or longer text.
         :param text: the text to transcribe
         :param sep: if True, inserts a separator between each transcribed word in text
@@ -45,11 +58,14 @@ class FairseqG2P:
         """
         transcribed_arr = []
         for wrd in text.split(' '):
-            if use_dict:
+            transcr = ''
+            if use_dict and self.custom_dict:
+                transcr = self.custom_dict.get(wrd)
+            if use_dict and not transcr:
                 transcr = self.pron_dict.get(wrd, '')
-                if transcr:
-                    transcribed_arr.append(transcr)
-                    continue
+            if transcr:
+                transcribed_arr.append(transcr)
+                continue
             if set(wrd).difference(self.alphabet):
                 print(wrd + ' contains non valid character(s) ' + str(set(wrd).difference(self.alphabet)) + ', skipping transcription.')
                 continue
