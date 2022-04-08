@@ -44,6 +44,8 @@ def compare_transcripts(comp_transcript, head_transcript):
     If a transcript differs only in a length mark or in voiced/voiceless or having post aspriation or not,
     it should be recognized as the same transcript (since we have already matched the corresponding word strings)
     """
+    if not comp_transcript:
+        return -1
 
     head_ind = len(head_transcript) - 1
     comp_ind = len(comp_transcript) - 1
