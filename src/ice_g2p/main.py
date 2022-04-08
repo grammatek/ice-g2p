@@ -42,13 +42,16 @@ def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_origi
             f.write(transcribed[key] + '\n')
 
 
-def process_string(input_str: str, syllab=False, use_dict=False, word_sep=False, lang_detect=False) -> str:
+def process_string(input_str: str, use_dict=False, syllab_symbol='', word_sep='',
+                   stress_label=False, lang_detect=False) -> str:
     print('processing: "' + input_str + '"')
-    g2p = Transcriber(G2P_METHOD.FAIRSEQ, lang_detect)
-    return g2p.transcribe(input_str, use_dict, syllab, word_sep)
+    g2p = Transcriber(G2P_METHOD.FAIRSEQ, lang_detect=lang_detect, syllab_symbol=syllab_symbol, word_sep=word_sep,
+                      stress_label=stress_label, use_dict=use_dict)
+    return g2p.transcribe(input_str)
 
 
-def process_file(filename: Path, syllab=False, use_dict=True, word_sep=False, lang_detect=False) -> dict:
+def process_file(filename: Path, use_dict=False, syllab_symbol='', word_sep='',
+                   stress_label=False, lang_detect=False) -> dict:
     """
     Transcribes the content of 'filename' line by line
     :param filename: input file to transcribe
@@ -59,15 +62,17 @@ def process_file(filename: Path, syllab=False, use_dict=True, word_sep=False, la
     with open(filename) as f:
         file_content = f.read().splitlines()
 
-    g2p = Transcriber(G2P_METHOD.FAIRSEQ, lang_detect)
+    g2p = Transcriber(G2P_METHOD.FAIRSEQ, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
+                   stress_label=stress_label, lang_detect=lang_detect)
     transcribed = {}
     for line in file_content:
-        transcribed[line] = g2p.transcribe(line, syllab, use_dict, word_sep)
+        transcribed[line] = g2p.transcribe(line)
 
     return transcribed
 
 
-def process_file_or_dir(file_or_dir: Path, out_suffix: str, syllab=False, use_dict=False, word_sep=False, keep_original=False, lang_detect=False) -> None:
+def process_file_or_dir(file_or_dir: Path, out_suffix: str, use_dict=False, syllab_symbol='', word_sep='',
+                   stress_label=False, lang_detect=False, keep_original=False) -> None:
     print("processing: " + str(file_or_dir))
     if os.path.isdir(file_or_dir):
         for root, dirs, files in os.walk(file_or_dir):
@@ -75,10 +80,12 @@ def process_file_or_dir(file_or_dir: Path, out_suffix: str, syllab=False, use_di
                 if filename.startswith('.'):
                     continue
                 file_path = Path(os.path.join(root, filename))
-                transcribed_content = process_file(file_path, syllab, use_dict, word_sep, lang_detect)
+                transcribed_content = process_file(file_path, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
+                   stress_label=stress_label, lang_detect=lang_detect)
                 write_transcribed(transcribed_content, file_path, out_suffix, keep_original)
     elif os.path.isfile(file_or_dir):
-        transcribed_content = process_file(file_or_dir, syllab, use_dict, word_sep, lang_detect)
+        transcribed_content = process_file(file_or_dir, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
+                   stress_label=stress_label, lang_detect=lang_detect)
         write_transcribed(transcribed_content, file_or_dir, out_suffix, keep_original)
 
 
@@ -88,10 +95,11 @@ def get_arguments():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--infile', '-if', type=Path, help='inputfile or directory')
     group.add_argument('--inputstr', '-i', help='input string')
-    parser.add_argument('--keep', '-k', action='store_true', help='keep original')
-    parser.add_argument('--sep', '-s', action='store_true', help='use word separator')
+    parser.add_argument('--sep', '-s', type=str, help='word separator to use')
+    parser.add_argument('--syll', '-y', type=str, help='syllable separator to use')
+    parser.add_argument('--stress', '-t', action='store_true', help='use stress labels')
     parser.add_argument('--dict', '-d', action='store_true', help='use pronunciation dictionary')
-    parser.add_argument('--syll', '-y', action='store_true', help='add syllabification and stress labeling')
+    parser.add_argument('--keep', '-k', action='store_true', help='keep original')
     parser.add_argument('--langdetect', '-l', action='store_true', help='use word-based language detection')
     return parser.parse_args()
 
@@ -102,6 +110,7 @@ def main():
     word_sep = args.sep
     use_dict = args.dict
     syllab = args.syll
+    stress = args.stress
     lang_detect = args.langdetect
     # we need either an input file or directory, or a string from stdin
     if args.infile is not None:
@@ -109,13 +118,16 @@ def main():
             logging.error(str(args.infile) + ' does not exist.')
             sys.exit(1)
         else:
-            process_file_or_dir(args.infile, '_transcribed', syllab, use_dict, word_sep, keep_original, lang_detect)
+            process_file_or_dir(args.infile, '_transcribed', use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
+                                stress_label=stress, lang_detect=lang_detect, keep_original=keep_original)
 
     if args.inputstr is not None:
         if keep_original:
-            print(args.inputstr + ' : ' + process_string(args.inputstr, syllab, use_dict, word_sep, lang_detect))
+            print(args.inputstr + ' : ' + process_string(args.inputstr, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
+                                stress_label=stress, lang_detect=lang_detect))
         else:
-            print(process_string(args.inputstr, syllab, use_dict, word_sep, lang_detect))
+            print(process_string(args.inputstr, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
+                                stress_label=stress, lang_detect=lang_detect))
 
 
 if __name__ == '__main__':
