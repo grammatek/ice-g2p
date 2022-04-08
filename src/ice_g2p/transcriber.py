@@ -9,19 +9,23 @@ from ice_g2p.stress import set_stress
 
 class G2P_METHOD(Enum):
     FAIRSEQ = 1
-    THRAX = 2
+    # THRAX = 2 TODO: implement!
 
 
 class Transcriber:
 
-    def __init__(self, g2p_method=G2P_METHOD.FAIRSEQ, lang_detect=False, use_dict=False, use_syll=False):
+    def __init__(self, g2p_method=G2P_METHOD.FAIRSEQ, lang_detect=False, use_dict=False, stress_label=False,
+                 syllab_symbol='', word_sep=''):
         self.g2p = self.init_g2p(g2p_method)
         self.use_dict = use_dict
-        self.use_syll = use_syll
+        self.syllab_symbol = syllab_symbol
+        self.word_separator = word_sep
+        self.add_stress_label = stress_label
         if lang_detect:
             self.g2p_foreign = self.init_g2p(g2p_method, lang_detect)
             self.lang_detect = True
         else:
+            self.g2p_foreign = None
             self.lang_detect = False
         if use_dict:
             from ice_g2p.dictionaries import get_dictionary
@@ -38,50 +42,76 @@ class Transcriber:
         else:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
 
-    def transcribe(self, input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep=False) -> str:
+    def set_custom_dict(self, custom_dict: dict):
+        """
+        A custom dictionary will be used additionally to the built in dictionary.
+        The custom dictionary, if present, is checked first and thus has priority over the built-in dictionary
+        in the cases where the include the same words.
+        Be careful when using a custom dictionary that it follows the same dialect as selected for the g2p and
+        thus the built-in dictionary.
+
+        :param custom_dict: a dictionary with custom vocabulary and/or transcriptions. Has priority over the
+        built-in dicionary
+        """
+        self.g2p.set_custom_dict(custom_dict)
+
+    def transcribe(self, input_str: str, icelandic=True, cmu=False) -> str:
         transcr_arr = []
         for wrd in input_str.split(' '):
             if icelandic:
                 # a word labelled as Icelandic will be sent to automatic lang detection
-                transcr_arr.append(self.transcribe_lang(wrd.strip(), use_dict, word_sep, self.is_icelandic(wrd.strip())))
+                transcr_arr.append(self.transcribe_lang(wrd.strip(), icelandic=self.is_icelandic(wrd.strip())))
             else:
                 # word labelled as not Icelandic, will be sent directly to foreign transcription model
                 transcr_arr.append(
-                    self.transcribe_lang(wrd.strip(), use_dict, word_sep, False))
-        if syllab:
-            entries = syllabify.init_pron_dict_from_tuples(list(zip(input_str.split(' '), transcr_arr)))
+                    self.transcribe_lang(wrd.strip(), icelandic=False))
+        if self.syllab_symbol:
+            entries = syllabify.init_pron_dict_from_tuples(list(zip(input_str.split(' '), transcr_arr)), self.syllab_symbol)
             syllabified_dict = syllabify.syllabify_and_label(entries)
             transcribed_utt = set_stress([syllabified_dict[wrd] for wrd in input_str.split(' ')])
-            transcribed = self.extract_transcript(transcribed_utt, word_sep=word_sep)
+            transcribed = self.extract_transcript(transcribed_utt, cmu)
+        elif self.word_separator:
+            transcribed = f' {self.word_separator} '.join(transcr_arr)
         else:
-            if word_sep:
-                if type(word_sep) == str:
-                    transcribed = f' {word_sep} '.join(transcr_arr)
-                else:
-                    transcribed = "-".join(transcr_arr)
-            else:
-                transcribed = ' '.join(transcr_arr)
+            transcribed = ' '.join(transcr_arr)
 
         return transcribed
 
-    def extract_transcript(self, syllabified: list, word_sep: str=None) -> str:
+    def extract_transcript(self, syllabified: list, cmu=False) -> str:
+        if cmu:
+            return self.extract_cmu_transcript(syllabified)
         result = ''
         for entr in syllabified:
-            if not result:
-                result += entr.simple_stress_format()
+            if self.add_stress_label:
+                string_repr = entr.simple_stress_format()
             else:
-                if word_sep:
-                    result += f" {word_sep} " + entr.simple_stress_format()
-                else:
-                    result += ' . ' + entr.simple_stress_format()
+                string_repr = entr.dot_format_syllables()
+            if not result:
+                result += string_repr
+            elif self.word_separator:
+                result += f" {self.word_separator} " + string_repr
+            else:
+                result += " " + string_repr
 
         return result
 
-    def transcribe_lang(self, input_str: str, use_dict=False, word_sep=False, icelandic=True) -> str:
-        if icelandic:
-            return self.g2p.transcribe(input_str.strip(), use_dict, word_sep)
+    def extract_cmu_transcript(self, syllabified: list) -> str:
+        result = ''
+        for entr in syllabified:
+            if not result:
+                result += entr.cmu_format()
+            elif self.word_separator:
+                result += f" {self.word_separator} " + entr.cmu_format()
+            else:
+                result += " " + entr.cmu_format()
+
+        return result
+
+    def transcribe_lang(self, input_str: str, icelandic=True) -> str:
+        if icelandic or self.g2p_foreign is None:
+            return self.g2p.transcribe(input_str.strip(), self.use_dict, self.word_separator)
         else:
-            return self.g2p_foreign.transcribe(input_str.strip(), use_dict, word_sep)
+            return self.g2p_foreign.transcribe(input_str.strip(), self.use_dict, self.word_separator)
 
     # Use trigrams to estimate the probability of a word being Icelandic or not
     def is_icelandic(self, word: str) -> bool:

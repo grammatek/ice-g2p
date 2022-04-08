@@ -6,9 +6,6 @@ from ice_g2p import entry
 
 
 VOWELS = ['a', 'á', 'e', 'é', 'i', 'í', 'o', 'ó', 'u', 'ú', 'y', 'ý', 'ö']
-#MODIFIER_MAP = comp_dict_db.get_modifier_map()
-#HEAD_MAP = comp_dict_db.get_head_map()
-#TRANSCR_MAP = pron_dict_db.get_transcriptions_map()
 MODIFIER_MAP = dictionaries.get_modifier_map()
 HEAD_MAP = dictionaries.get_head_map()
 TRANSCR_MAP = dictionaries.get_dictionary()
