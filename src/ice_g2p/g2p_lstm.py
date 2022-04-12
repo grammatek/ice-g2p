@@ -16,7 +16,7 @@ DICT_PREFIX = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dictiona
 
 class FairseqG2P:
 
-    def __init__(self, model_file='model-265-.3-s-s.pt', dialect='standard', use_english=False):
+    def __init__(self, model_file='model-256-.3-s-s.pt', dialect='standard', use_english=False):
         """
         Initializes a Fairseq lstm g2p model according to model_path
         and model_file. If use_cwd=False, be sure to set model_path to
