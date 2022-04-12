@@ -118,7 +118,7 @@ def main():
     lang_detect = args.langdetect
 
     if dialect not in AVAILABLE_DIALECTS:
-        logging.error(f'Transcription is not available for dialect {dialect}. Available dialects: {AVAILABLE_DIALECTS}')
+        logging.error(f'Transcription is not available for dialect "{dialect}". Available dialects: {AVAILABLE_DIALECTS}')
         sys.exit(1)
 
     # we need either an input file or directory, or a string from stdin
