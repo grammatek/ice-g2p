@@ -19,6 +19,7 @@ from pathlib import Path
 from ice_g2p.transcriber import Transcriber
 from ice_g2p.transcriber import G2P_METHOD
 
+AVAILABLE_DIALECTS = ['standard', 'north']
 
 def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_original: bool) -> None:
     """
@@ -42,15 +43,15 @@ def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_origi
             f.write(transcribed[key] + '\n')
 
 
-def process_string(input_str: str, use_dict=False, syllab_symbol='', word_sep='',
+def process_string(input_str: str, dialect='standard', use_dict=False, syllab_symbol='', word_sep='',
                    stress_label=False, lang_detect=False) -> str:
     print('processing: "' + input_str + '"')
-    g2p = Transcriber(G2P_METHOD.FAIRSEQ, lang_detect=lang_detect, syllab_symbol=syllab_symbol, word_sep=word_sep,
+    g2p = Transcriber(G2P_METHOD.FAIRSEQ, dialect=dialect, lang_detect=lang_detect, syllab_symbol=syllab_symbol, word_sep=word_sep,
                       stress_label=stress_label, use_dict=use_dict)
     return g2p.transcribe(input_str)
 
 
-def process_file(filename: Path, use_dict=False, syllab_symbol='', word_sep='',
+def process_file(filename: Path, dialect='standard', use_dict=False, syllab_symbol='', word_sep='',
                    stress_label=False, lang_detect=False) -> dict:
     """
     Transcribes the content of 'filename' line by line
@@ -62,7 +63,7 @@ def process_file(filename: Path, use_dict=False, syllab_symbol='', word_sep='',
     with open(filename) as f:
         file_content = f.read().splitlines()
 
-    g2p = Transcriber(G2P_METHOD.FAIRSEQ, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
+    g2p = Transcriber(G2P_METHOD.FAIRSEQ, dialect=dialect, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
                    stress_label=stress_label, lang_detect=lang_detect)
     transcribed = {}
     for line in file_content:
@@ -71,7 +72,7 @@ def process_file(filename: Path, use_dict=False, syllab_symbol='', word_sep='',
     return transcribed
 
 
-def process_file_or_dir(file_or_dir: Path, out_suffix: str, use_dict=False, syllab_symbol='', word_sep='',
+def process_file_or_dir(file_or_dir: Path, out_suffix: str, dialect='standard', use_dict=False, syllab_symbol='', word_sep='',
                    stress_label=False, lang_detect=False, keep_original=False) -> None:
     print("processing: " + str(file_or_dir))
     if os.path.isdir(file_or_dir):
@@ -80,11 +81,11 @@ def process_file_or_dir(file_or_dir: Path, out_suffix: str, use_dict=False, syll
                 if filename.startswith('.'):
                     continue
                 file_path = Path(os.path.join(root, filename))
-                transcribed_content = process_file(file_path, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
+                transcribed_content = process_file(file_path, dialect=dialect, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
                    stress_label=stress_label, lang_detect=lang_detect)
                 write_transcribed(transcribed_content, file_path, out_suffix, keep_original)
     elif os.path.isfile(file_or_dir):
-        transcribed_content = process_file(file_or_dir, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
+        transcribed_content = process_file(file_or_dir, dialect=dialect, use_dict=use_dict, syllab_symbol=syllab_symbol, word_sep=word_sep,
                    stress_label=stress_label, lang_detect=lang_detect)
         write_transcribed(transcribed_content, file_or_dir, out_suffix, keep_original)
 
@@ -95,6 +96,8 @@ def get_arguments():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--infile', '-if', type=Path, help='inputfile or directory')
     group.add_argument('--inputstr', '-i', help='input string')
+    parser.add_argument('--dialect', '-a', default='standard',
+                        help='dialect to transcribe by, available: "standard" and "north"')
     parser.add_argument('--sep', '-s', type=str, help='word separator to use')
     parser.add_argument('--syll', '-y', type=str, help='syllable separator to use')
     parser.add_argument('--stress', '-t', action='store_true', help='use stress labels')
@@ -107,26 +110,32 @@ def get_arguments():
 def main():
     args = get_arguments()
     keep_original = args.keep
+    dialect = args.dialect
     word_sep = args.sep
     use_dict = args.dict
     syllab = args.syll
     stress = args.stress
     lang_detect = args.langdetect
+
+    if dialect not in AVAILABLE_DIALECTS:
+        logging.error(f'Transcription is not available for dialect {dialect}. Available dialects: {AVAILABLE_DIALECTS}')
+        sys.exit(1)
+
     # we need either an input file or directory, or a string from stdin
     if args.infile is not None:
         if not args.infile.exists():
             logging.error(str(args.infile) + ' does not exist.')
             sys.exit(1)
         else:
-            process_file_or_dir(args.infile, '_transcribed', use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
+            process_file_or_dir(args.infile, '_transcribed', dialect=dialect, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
                                 stress_label=stress, lang_detect=lang_detect, keep_original=keep_original)
 
     if args.inputstr is not None:
         if keep_original:
-            print(args.inputstr + ' : ' + process_string(args.inputstr, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
+            print(args.inputstr + ' : ' + process_string(args.inputstr, dialect=dialect, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
                                 stress_label=stress, lang_detect=lang_detect))
         else:
-            print(process_string(args.inputstr, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
+            print(process_string(args.inputstr, dialect=dialect, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
                                 stress_label=stress, lang_detect=lang_detect))
 
 
