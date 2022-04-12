@@ -10,28 +10,30 @@ from fairseq.models.transformer import TransformerModel
 # use this separator
 WORD_SEP = '-'
 ALPHABET = '[aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]'
+ENGLISH_ALPHABET = '[aåäbcdefghijklmnoöpqrstuüvwxyz]'
 DICT_PREFIX = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dictionaries/ice_pron_dict_')
 
 
 class FairseqG2P:
 
-    def __init__(self, model_path=f'{os.path.dirname(os.path.abspath(__file__))}/fairseq_models/',
-                 model_file='model-256-.3-s-s.pt', dialect='standard', alphabet=ALPHABET):
+    def __init__(self, model_file='model-265-.3-s-s.pt', dialect='standard', use_english=False):
         """
         Initializes a Fairseq lstm g2p model according to model_path
         and model_file. If use_cwd=False, be sure to set model_path to
         an absolute path.
-        :param model_path: a relative or an absolute path to the model-dir
         :param model_file: the g2p model file
         :param dialect: the pronunciation variant to use
         :param use_cwd: if set to False, model_path has to be absolute
         """
-        self.model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fairseq_models", dialect)
+        self.model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fairseq_models', dialect)
         self.model_file = model_file
-        print(self.model_path)
-        print(self.model_file)
-        self.g2p_model = TransformerModel.from_pretrained(self.model_path, self.model_file)
-        self.alphabet = alphabet
+        if use_english:
+            model_path_english = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fairseq_models', 'english')
+            self.g2p_model = TransformerModel.from_pretrained(model_path_english, self.model_file)
+            self.alphabet = ENGLISH_ALPHABET
+        else:
+            self.g2p_model = TransformerModel.from_pretrained(self.model_path, self.model_file)
+            self.alphabet = ALPHABET
         self.pron_dict = self.read_prondict(dialect)
         self.custom_dict = None
 
@@ -58,6 +60,7 @@ class FairseqG2P:
         """
         transcribed_arr = []
         for wrd in text.split(' '):
+            # start with lookup
             transcr = ''
             if use_dict and self.custom_dict:
                 transcr = self.custom_dict.get(wrd)
@@ -66,10 +69,15 @@ class FairseqG2P:
             if transcr:
                 transcribed_arr.append(transcr)
                 continue
+
+            # if transcription not yet found, perform automatic g2p
             if set(wrd).difference(self.alphabet):
-                print(wrd + ' contains non valid character(s) ' + str(set(wrd).difference(self.alphabet)) + ', skipping transcription.')
+                print(text + ' contains non valid character(s) ' + str(
+                    set(wrd).difference(self.alphabet)) + ', skipping transcription.')
                 continue
+
             transcribed_arr.append(self.g2p_model.translate(' '.join(wrd)))
+
         if sep:
             transcribed = WORD_SEP.join(transcribed_arr)
         else:

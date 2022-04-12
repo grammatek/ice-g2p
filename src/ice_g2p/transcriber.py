@@ -14,15 +14,16 @@ class G2P_METHOD(Enum):
 
 class Transcriber:
 
-    def __init__(self, g2p_method=G2P_METHOD.FAIRSEQ, lang_detect=False, use_dict=False, stress_label=False,
-                 syllab_symbol='', word_sep=''):
-        self.g2p = self.init_g2p(g2p_method)
+    def __init__(self, g2p_method=G2P_METHOD.FAIRSEQ, dialect='standard', lang_detect=False, use_dict=False,
+                 stress_label=False, syllab_symbol='', word_sep=''):
+
+        self.g2p = self.init_g2p(g2p_method, dialect)
         self.use_dict = use_dict
         self.syllab_symbol = syllab_symbol
         self.word_separator = word_sep
         self.add_stress_label = stress_label
         if lang_detect:
-            self.g2p_foreign = self.init_g2p(g2p_method, lang_detect)
+            self.g2p_foreign = self.init_g2p(g2p_method, dialect=dialect, use_english=True)
             self.lang_detect = True
         else:
             self.g2p_foreign = None
@@ -33,12 +34,9 @@ class Transcriber:
         else:
             self.dictionary = None
 
-    def init_g2p(self, g2p_method: G2P_METHOD, lang_detect: bool=False):
+    def init_g2p(self, g2p_method: G2P_METHOD, dialect: str='standard', use_english=False) -> FairseqG2P:
         if g2p_method == G2P_METHOD.FAIRSEQ:
-            if lang_detect:
-                return FairseqG2P(dialect='english', alphabet='[aåäbcdefghijklmnoöpqrstuüvwxyz]')
-            else:
-                return FairseqG2P()
+                return FairseqG2P(dialect=dialect, use_english=use_english)
         else:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
 
