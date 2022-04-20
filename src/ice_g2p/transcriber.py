@@ -114,7 +114,15 @@ class Transcriber:
     # Use trigrams to estimate the probability of a word being Icelandic or not
     def is_icelandic(self, word: str) -> bool:
         # if we don't have a foreign g2p, all words are processed as Icelandic
-        if not self.lang_detect:
+        if not self.lang_detect or not self.g2p_foreign:
+            return True
+
+        # If word contains non-valid characters for either of the models, it can't be transcribed by
+        # the corresponding model. We use the Icelandic one as fallback, so just check for non-valid
+        # English characters. Important check because of loanwords that might contain Icelandic characters
+        # like: 'absúrd', 'dnépr', 'penélope' that have higher combined trigram probs for English despite
+        # the non-valid trigrams containing Icelandic characters.
+        if set(word).difference(self.g2p_foreign.alphabet):
             return True
 
         ice_probs = []
@@ -128,6 +136,7 @@ class Transcriber:
                 eng_probs.append(eng_grams[(c1, c2)][c3])
             else:
                 eng_probs.append(0.001)
+        print(word + ' has is-prob: ' + str(ice_probs) + ' and en-prob: ' + str(eng_probs))
         if math.prod(ice_probs) >= math.prod(eng_probs):
             return True
         return False
