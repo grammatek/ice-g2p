@@ -67,10 +67,27 @@ class TestG2P_LSTM(unittest.TestCase):
         transcribed = g2p.transcribe(test_string)
         self.assertEqual('T E s I t_h E x s t I E n 9 N k v I r 9i: k v I s a r', transcribed)
 
+    def test_loan_words(self):
+        print("Current working dir: " + os.getcwd())
+        test_arr = self.get_loan_words()
+        g2p = Transcriber(lang_detect=True, use_dict=True, syllab_symbol='')
+        # input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep: str=None, cmu=False
+        for word in test_arr:
+            transcribed = g2p.transcribe(word)
+            print(word + ': ' + transcribed)
 
     def get_custom_dict(self):
         custom = {'texti': 't_h E x s t I', 'engir': '9 N k v I r'}
         return custom
+
+    def get_loan_words(self):
+        return ['absúrd', 'arkímedes', 'asklepíos', 'bambustré', 'brandháf', 'deuteronomýs',  'díen', 'dnépr',
+                 'dulmál', 'é', 'émilie', 'endymíon', 'eteóklesar', 'expressó', 'ganýmedes',
+                'ganýmedesar', 'glóey', 'goluþyt', 'grenitré', 'grenitrén', 'guantánamo', 'guaraní', 'híjab',
+                'hippókrates', 'iréne', 'jesúbarn', 'jesúbarnsins', 'jimmý', 'kæk', 'laertíos', 'leóne',
+                'leonídas', 'leonóru', 'mé', 'melkíor', 'nerþus', 'nuées', 'oní', 'oxalsýru', 'penélope',
+                'pénelope', 'polýdevkes', 'sámual', 'smotterí', 'spaghettí', 'tápmikil', 'tertíer', 'troðfull',
+                'trotskí', 'tupí', 'viskí', 'yatsý', 'ýgs', 'þth']
 
 if __name__ == '__main__':
     unittest.main()
