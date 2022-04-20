@@ -70,7 +70,7 @@ class TestG2P_LSTM(unittest.TestCase):
     def test_loan_words(self):
         print("Current working dir: " + os.getcwd())
         test_arr = self.get_loan_words()
-        g2p = Transcriber(lang_detect=True, use_dict=True, syllab_symbol='.')
+        g2p = Transcriber(lang_detect=True, use_dict=True, syllab_symbol='')
         # input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep: str=None, cmu=False
         for word in test_arr:
             transcribed = g2p.transcribe(word)
