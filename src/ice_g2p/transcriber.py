@@ -136,7 +136,6 @@ class Transcriber:
                 eng_probs.append(eng_grams[(c1, c2)][c3])
             else:
                 eng_probs.append(0.001)
-        print(word + ' has is-prob: ' + str(ice_probs) + ' and en-prob: ' + str(eng_probs))
         if math.prod(ice_probs) >= math.prod(eng_probs):
             return True
         return False
