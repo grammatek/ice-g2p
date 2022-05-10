@@ -43,11 +43,18 @@ class TestG2P_LSTM(unittest.TestCase):
         transcribed = g2p.transcribe(test_string)
         self.assertEqual('l_0 9i:1 - p_h a0 - i:1 - p Y1 r_0 - t Y0 - l_0 9i:1 - p_h a0 - s t r au0 - k_h Y0 r', transcribed)
 
+    def test_double_space(self):
+        test_string = 'takk fyrir jóhanna .  góðan dag góðir gestir .'
+        g2p = Transcriber()
+        transcribed = g2p.transcribe(test_string)
+        self.assertEqual('t_h a h k f I: r I r j ou: h a n a   k ou: D a n t a: G k ou: D I r c E s t I r ', transcribed)
+
+
     def test_english(self):
         test_string = 'what ertu crazy'
         g2p = Transcriber(dialect='north', use_dict=True, lang_detect=True, syllab_symbol='-', word_sep='-', stress_label=True)
         transcribed = g2p.transcribe(test_string)
-        self.assertEqual('v a1 h t - E1 r_0 - t Y0 - k_h r ei:1 - s i0', transcribed)
+        self.assertEqual('v O1 t - E1 r_0 - t Y0 - k_h r ei:1 - s i0', transcribed)
 
 
     def test_cmu_format(self):
