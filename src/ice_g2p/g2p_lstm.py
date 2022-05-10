@@ -60,6 +60,8 @@ class FairseqG2P:
         """
         transcribed_arr = []
         for wrd in text.split(' '):
+            if not wrd:
+                continue
             # start with lookup
             transcr = ''
             if use_dict and self.custom_dict:
