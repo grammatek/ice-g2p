@@ -124,7 +124,9 @@ class Transcriber:
         # the non-valid trigrams containing Icelandic characters.
         if set(word).difference(self.g2p_foreign.alphabet):
             return True
-
+        # Special case for spelling
+        if len(word) == 1:
+            return True
         ice_probs = []
         eng_probs = []
         for c1, c2, c3 in trigrams(word.lower(), pad_right=True, pad_left=True):
