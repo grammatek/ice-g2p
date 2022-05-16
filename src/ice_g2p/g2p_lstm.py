@@ -35,6 +35,14 @@ class FairseqG2P:
         self.pron_dict = self.read_prondict(dialect)
         self.custom_dict = None
 
+    def override_pron_dict(self, pron_dict: dict):
+        """
+        Override the core pronunciation dictionary initialized in init
+        :param pron_dict: new pronunciation dictionary
+        :return:
+        """
+        self.pron_dict = pron_dict
+
     def set_custom_dict(self, custom_dict: dict):
         """
         A custom dictionary will be used additionally to the built in dictionary.

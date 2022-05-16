@@ -42,6 +42,14 @@ class Transcriber:
         else:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
 
+    def override_core_dict(self, pron_dict: dict):
+        """
+        Override the default pronunciation dictionary
+        :param pron_dict:
+        :return:
+        """
+        self.g2p.override_pron_dict(pron_dict)
+
     def set_custom_dict(self, custom_dict: dict):
         """
         A custom dictionary will be used additionally to the built in dictionary.
