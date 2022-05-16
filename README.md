@@ -1,6 +1,13 @@
 # Ice-g2p : Phonetic transcription (grapheme-to-phoneme) for Icelandic
 
-Ice-g2p is a module for automatic phonetic transcription of Icelandic.
+Ice-g2p is a module for automatic phonetic transcription of Icelandic. Ice-g2p can be used as a stand-alone
+command line tool or as a library, and can e.g. be used for the final text processing step in a frontend
+pipeline for speech synthesis (TTS).
+
+Ice-g2p uses a manually curated [pronunciation dictionary](https://github.com/grammatek/iceprondict)
+and LSTM-based [g2p-models](https://github.com/grammatek/g2p-lstm) for unknown words. It can be used
+to transcribe Icelandic in four pronunciation variations and also uses a special model to transcribe
+English words that might occur in Icelandic texts, using the Icelandic phone set.
 
 ## Setup
 
@@ -22,8 +29,13 @@ Characters allowed: _[aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]_. If other c
 
 To transcribe text, currently two main options are available, direct from stdin to stdout or from file or a collection of files (directory) 
 
-    %python src/ice-g2p/main.py -i 'hljóðrita þetta takk'
+    $ python3 src/ice-g2p/main.py -i 'hljóðrita þetta takk'
 	l_0 j ou D r I t a T E h t a t_h a h k
+
+    $ python3 src/ice-g2p/main.py -i 'þetta war fürir þig'
+    war contains non valid character(s) {'w'}, skipping transcription.
+    fürir contains non valid character(s) {'ü'}, skipping transcription.
+    T E h t a   T I: G
 
 	%python src/ice-g2p/main.py -if file_to_transcribe.txt
 
