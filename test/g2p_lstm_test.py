@@ -36,6 +36,26 @@ class TestG2P_LSTM(unittest.TestCase):
         transcribed = g2p.transcribe(test_string)
         self.assertEqual('l_0 9i:1 - p a0 - i:1 - p Y1 r_0 - t Y0 - i:1 - t a:1 G', transcribed)
 
+    def test_dialect(self):
+        # 'hlaupa' in dict, 'hlaupastrákur' not in dict
+        test_string = 'hlaupa í burtu hlaupastrákur'
+        g2p = Transcriber(dialect='north', use_dict=True, syllab_symbol='-', word_sep='-', stress_label=True)
+        transcribed = g2p.transcribe(test_string)
+        self.assertEqual('l_0 9i:1 - p_h a0 - i:1 - p Y1 r_0 - t Y0 - l_0 9i:1 - p_h a0 - s t r au0 - k_h Y0 r', transcribed)
+
+    def test_double_space(self):
+        test_string = 'takk fyrir jóhanna .  góðan dag góðir gestir .'
+        g2p = Transcriber()
+        transcribed = g2p.transcribe(test_string)
+        self.assertEqual('t_h a h k f I: r I r j ou: h a n a   k ou: D a n t a: G k ou: D I r c E s t I r ', transcribed)
+
+
+    def test_english(self):
+        test_string = 'what ertu crazy'
+        g2p = Transcriber(dialect='north', use_dict=True, lang_detect=True, syllab_symbol='-', word_sep='-', stress_label=True)
+        transcribed = g2p.transcribe(test_string)
+        self.assertEqual('v O1 t - E1 r_0 - t Y0 - k_h r ei:1 - s i0', transcribed)
+
 
     def test_cmu_format(self):
         print("Current working dir: " + os.getcwd())
@@ -54,10 +74,27 @@ class TestG2P_LSTM(unittest.TestCase):
         transcribed = g2p.transcribe(test_string)
         self.assertEqual('T E s I t_h E x s t I E n 9 N k v I r 9i: k v I s a r', transcribed)
 
+    def test_loan_words(self):
+        print("Current working dir: " + os.getcwd())
+        test_arr = self.get_loan_words()
+        g2p = Transcriber(lang_detect=True, use_dict=True, syllab_symbol='')
+        # input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep: str=None, cmu=False
+        for word in test_arr:
+            transcribed = g2p.transcribe(word)
+            print(word + ': ' + transcribed)
 
     def get_custom_dict(self):
         custom = {'texti': 't_h E x s t I', 'engir': '9 N k v I r'}
         return custom
+
+    def get_loan_words(self):
+        return ['absúrd', 'arkímedes', 'asklepíos', 'bambustré', 'brandháf', 'deuteronomýs',  'díen', 'dnépr',
+                 'dulmál', 'é', 'émilie', 'endymíon', 'eteóklesar', 'expressó', 'ganýmedes',
+                'ganýmedesar', 'glóey', 'goluþyt', 'grenitré', 'grenitrén', 'guantánamo', 'guaraní', 'híjab',
+                'hippókrates', 'iréne', 'jesúbarn', 'jesúbarnsins', 'jimmý', 'kæk', 'laertíos', 'leóne',
+                'leonídas', 'leonóru', 'mé', 'melkíor', 'nerþus', 'nuées', 'oní', 'oxalsýru', 'penélope',
+                'pénelope', 'polýdevkes', 'sámual', 'smotterí', 'spaghettí', 'tápmikil', 'tertíer', 'troðfull',
+                'trotskí', 'tupí', 'viskí', 'yatsý', 'ýgs', 'þth']
 
 if __name__ == '__main__':
     unittest.main()

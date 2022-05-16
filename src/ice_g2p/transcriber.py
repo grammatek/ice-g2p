@@ -14,15 +14,16 @@ class G2P_METHOD(Enum):
 
 class Transcriber:
 
-    def __init__(self, g2p_method=G2P_METHOD.FAIRSEQ, lang_detect=False, use_dict=False, stress_label=False,
-                 syllab_symbol='', word_sep=''):
-        self.g2p = self.init_g2p(g2p_method)
+    def __init__(self, g2p_method=G2P_METHOD.FAIRSEQ, dialect='standard', lang_detect=False, use_dict=False,
+                 stress_label=False, syllab_symbol='', word_sep=''):
+
+        self.g2p = self.init_g2p(g2p_method, dialect)
         self.use_dict = use_dict
         self.syllab_symbol = syllab_symbol
         self.word_separator = word_sep
         self.add_stress_label = stress_label
         if lang_detect:
-            self.g2p_foreign = self.init_g2p(g2p_method, lang_detect)
+            self.g2p_foreign = self.init_g2p(g2p_method, dialect=dialect, use_english=True)
             self.lang_detect = True
         else:
             self.g2p_foreign = None
@@ -33,12 +34,9 @@ class Transcriber:
         else:
             self.dictionary = None
 
-    def init_g2p(self, g2p_method: G2P_METHOD, lang_detect: bool=False):
+    def init_g2p(self, g2p_method: G2P_METHOD, dialect: str='standard', use_english=False) -> FairseqG2P:
         if g2p_method == G2P_METHOD.FAIRSEQ:
-            if lang_detect:
-                return FairseqG2P(dialect='english', alphabet='[aåäbcdefghijklmnoöpqrstuüvwxyz]')
-            else:
-                return FairseqG2P()
+                return FairseqG2P(dialect=dialect, use_english=use_english)
         else:
             raise ValueError('Model ' + str(g2p_method) + ' does not exist!')
 
@@ -124,9 +122,19 @@ class Transcriber:
     # Use trigrams to estimate the probability of a word being Icelandic or not
     def is_icelandic(self, word: str) -> bool:
         # if we don't have a foreign g2p, all words are processed as Icelandic
-        if not self.lang_detect:
+        if not self.lang_detect or not self.g2p_foreign:
             return True
 
+        # If word contains non-valid characters for either of the models, it can't be transcribed by
+        # the corresponding model. We use the Icelandic one as fallback, so just check for non-valid
+        # English characters. Important check because of loanwords that might contain Icelandic characters
+        # like: 'absúrd', 'dnépr', 'penélope' that have higher combined trigram probs for English despite
+        # the non-valid trigrams containing Icelandic characters.
+        if set(word).difference(self.g2p_foreign.alphabet):
+            return True
+        # Special case for spelling
+        if len(word) == 1:
+            return True
         ice_probs = []
         eng_probs = []
         for c1, c2, c3 in trigrams(word.lower(), pad_right=True, pad_left=True):
