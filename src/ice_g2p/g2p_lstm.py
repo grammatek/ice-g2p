@@ -36,6 +36,7 @@ class FairseqG2P:
             self.alphabet = ALPHABET
         self.pron_dict = self.read_prondict(dialect)
         self.custom_dict = None
+        self.automatic_g2p_dict = {}
 
     def override_pron_dict(self, pron_dict: dict):
         """
@@ -72,21 +73,27 @@ class FairseqG2P:
                 continue
             # start with lookup
             transcr = ''
-            if use_dict and self.custom_dict:
+            if use_dict:
+                transcr = self.automatic_g2p_dict.get(wrd)
+            if use_dict and self.custom_dict and not transcr:
                 transcr = self.custom_dict.get(wrd)
             if use_dict and not transcr:
                 transcr = self.pron_dict.get(wrd, '')
-            if transcr:
-                transcribed_arr.append(transcr)
-                continue
+            if not transcr:
 
-            # if transcription not yet found, perform automatic g2p
-            if set(wrd).difference(self.alphabet):
-                print(text + ' contains non valid character(s) ' + str(
-                    set(wrd).difference(self.alphabet)) + ', skipping transcription.')
-                continue
+                # if transcription not yet found, perform automatic g2p
+                if set(wrd).difference(self.alphabet):
+                    print(text + ' contains non valid character(s) ' + str(
+                        set(wrd).difference(self.alphabet)) + ', skipping transcription.')
+                    continue
 
-            transcribed_arr.append(self.g2p_model.translate(' '.join(wrd)))
+                transcr = self.g2p_model.translate(' '.join(wrd))
+
+                # add to automatic_g2p_dict so that each word only gets transcribed once in batch processing.
+                self.automatic_g2p_dict[wrd] = transcr
+
+            # add transcription regardless of origin
+            transcribed_arr.append(transcr)
 
         if sep:
             transcribed = WORD_SEP.join(transcribed_arr)
