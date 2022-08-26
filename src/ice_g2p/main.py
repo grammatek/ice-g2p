@@ -16,10 +16,12 @@ import logging
 import argparse
 from pathlib import Path
 
+from ice_g2p.converter import Converter
 from ice_g2p.transcriber import Transcriber
 from ice_g2p.transcriber import G2P_METHOD
 
 AVAILABLE_DIALECTS = ['standard', 'north']
+
 
 def write_transcribed(transcribed: dict, filename: Path, suffix: str, keep_original: bool) -> None:
     """
@@ -90,6 +92,12 @@ def process_file_or_dir(file_or_dir: Path, out_suffix: str, dialect='standard', 
         write_transcribed(transcribed_content, file_or_dir, out_suffix, keep_original)
 
 
+def convert(transcription: str, from_alpha: str, to_alpha):
+    converter = Converter()
+    converted = converter.convert(transcription, from_alpha, to_alpha)
+    return converted
+
+
 def get_arguments():
     parser = argparse.ArgumentParser(description='Transcribe text input to phonetic representation. Provide '
                                                  'an input file or directory, or a string on stdin to transcribe.')
@@ -104,6 +112,7 @@ def get_arguments():
     parser.add_argument('--dict', '-d', action='store_true', help='use pronunciation dictionary')
     parser.add_argument('--keep', '-k', action='store_true', help='keep original')
     parser.add_argument('--langdetect', '-l', action='store_true', help='use word-based language detection')
+    parser.add_argument('--phoneticalpha', '-p', type=str, help='output in a specific phonetic alphabet')
     return parser.parse_args()
 
 
@@ -116,6 +125,7 @@ def main():
     syllab = args.syll
     stress = args.stress
     lang_detect = args.langdetect
+    alphabet = args.phoneticalpha
 
     if dialect not in AVAILABLE_DIALECTS:
         logging.error(f'Transcription is not available for dialect "{dialect}". Available dialects: {AVAILABLE_DIALECTS}')
@@ -131,12 +141,15 @@ def main():
                                 stress_label=stress, lang_detect=lang_detect, keep_original=keep_original)
 
     if args.inputstr is not None:
+        transcribed = process_string(args.inputstr, dialect=dialect, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
+                                stress_label=stress, lang_detect=lang_detect)
+
+        if alphabet:
+            transcribed = convert(transcribed, 'SAMPA', alphabet)
         if keep_original:
-            print(args.inputstr + ' : ' + process_string(args.inputstr, dialect=dialect, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
-                                stress_label=stress, lang_detect=lang_detect))
+            print(args.inputstr + ' : ' + transcribed)
         else:
-            print(process_string(args.inputstr, dialect=dialect, use_dict=use_dict, syllab_symbol=syllab, word_sep=word_sep,
-                                stress_label=stress, lang_detect=lang_detect))
+            print(transcribed)
 
 
 if __name__ == '__main__':
