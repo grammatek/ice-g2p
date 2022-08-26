@@ -80,6 +80,18 @@ Using the `-l` flag allows for word-based language detection, where words consid
 	%python src/ice-g2p/main.py -i 'hljóðrita þetta please' -l
 	l_0 j ou D r I t a T E h t a p_h l i: s
 
+
+## Data
+
+The file [sampa_ipa_single_flite.tsv](https://github.com/grammatek/ice-g2p/tree/master/src/ice_g2p/data/sampa_ipa_single_flite.tsv) contains all the phonetic alphabets that have been used in Icelandic speech technology projects 
+with in the language technology program. 
+
+* [X-SAMPA](https://en.wikipedia.org/wiki/X-SAMPA)
+* [IPA](https://www.internationalphoneticassociation.org/content/ipa-chart)
+* Single: A custom alphabet designed to only contain one character per phone
+* Flite: A custom alphabet for Festival/Flite that only contains ascii alphabetic characters (no ':', '_', or digits)
+
+
 ## Trouble shooting & inquiries
 
 This application is still in development. If you encounter any errors, feel free to open an issue inside the
