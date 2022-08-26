@@ -57,6 +57,7 @@ The options available:
   	--sep, -s             use word separator
 	--dict, -d            use pronunciation dictionary
 	--langdetect, -l      use word-based language detection
+    --phoneticalpha, -p   return the output in a specific alphabet (default: SAMPA)
 
 Using the `-k` flag keeps the original grapheme strings and for file input/output writes the original strings in the first column of the tab separated output file, and the phonetic transcription in the second one.
 The `-s`flag adds the defined word separator to the transcription and with the `-y` flag syllabification is added to 
