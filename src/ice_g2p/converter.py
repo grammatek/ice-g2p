@@ -71,7 +71,7 @@ class Converter:
 
         if from_alphabet == to_alphabet:
             return input
-        
+
         converted_str = ''
         current_dict = self.alphabet_dictionary[from_alphabet]
         for symbol in input.split():
