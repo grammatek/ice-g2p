@@ -19,16 +19,15 @@ class FairseqG2P:
     def __init__(self, model_file='model-256-.3-s-s.pt', dialect='standard', use_english=False):
         """
         Initializes a Fairseq lstm g2p model according to model_path
-        and model_file. If use_cwd=False, be sure to set model_path to
-        an absolute path.
+        and model_file.
         :param model_file: the g2p model file
         :param dialect: the pronunciation variant to use
         :param use_cwd: if set to False, model_path has to be absolute
         """
-        self.model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fairseq_models', dialect)
+        self.model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fairseq_models/ice-g2p-models', dialect)
         self.model_file = model_file
         if use_english:
-            model_path_english = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fairseq_models', 'english')
+            model_path_english = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fairseq_models/ice-g2p-models', 'english')
             self.g2p_model = TransformerModel.from_pretrained(model_path_english, self.model_file)
             self.alphabet = ENGLISH_ALPHABET
         else:
