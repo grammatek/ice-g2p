@@ -4,7 +4,7 @@ Converts phonetic transcriptions in one alphabet to transcriptions in another al
 import os
 
 package_path = os.path.dirname(os.path.abspath(__file__))
-ALPHABETS_FILE = os.path.join(package_path, 'data/sampa_ipa_single_flite.tsv')
+ALPHABETS_FILE = os.path.join(package_path, 'data/sampa_ipa_single_flite.csv')
 
 
 class Converter:
