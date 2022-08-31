@@ -98,6 +98,11 @@ def convert(transcription: str, from_alpha: str, to_alpha):
     return converted
 
 
+def get_alphabets():
+    converter = Converter()
+    return converter.get_valid_alphabets()
+
+
 def get_arguments():
     parser = argparse.ArgumentParser(description='Transcribe text input to phonetic representation. Provide '
                                                  'an input file or directory, or a string on stdin to transcribe.')
@@ -129,6 +134,11 @@ def main():
 
     if dialect not in AVAILABLE_DIALECTS:
         logging.error(f'Transcription is not available for dialect "{dialect}". Available dialects: {AVAILABLE_DIALECTS}')
+        sys.exit(1)
+
+    available_alphabets = get_alphabets()
+    if alphabet and not alphabet in available_alphabets:
+        logging.error(f'{alphabet} is not available. Available phonetic alphabets: {available_alphabets}')
         sys.exit(1)
 
     # we need either an input file or directory, or a string from stdin
