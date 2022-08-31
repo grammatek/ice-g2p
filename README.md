@@ -87,6 +87,30 @@ Using the `-l` flag allows for word-based language detection, where words consid
 	$ ice-g2p -i 'hljóðrita þetta please' -l
 	l_0 j ou D r I t a T E h t a p_h l i: s
 
+## Import to project
+
+To use ice-g2p in a Python project, you import the Transcriber:
+
+    from ice_g2p.transcriber import Transcriber
+
+    g2p = Transcriber()
+    grapheme_string = 'halló heimur'
+    transcribed = g2p.transcribe(grapheme_string)
+    # transcribed == 'h a l ou h ei: m Y r'
+
+To use another phonetic alphabet, import the converter too:
+
+    from ice_g2p.transcriber import Transcriber
+    from ice_g2p.converter import Converter
+    
+    g2p = Transcriber()
+    conv = Converter()
+    grapheme_string = 'góðan daginn heimur'
+    transcribed = g2p.transcribe(grapheme_string)
+    # transcribed == 'k ou: D a n t ai j I n h ei: m Y r'
+    converted = conv.convert(transcribed, 'SAMPA', 'IPA')
+    # converted == 'k ouː ð a n t ai j ɪ n h eiː m ʏ r'
+    
 
 ## Data
 
