@@ -11,14 +11,20 @@ English words that might occur in Icelandic texts, using the Icelandic phone set
 
 ## Setup
 
+Install from PyPI (into an active virtual environment): 
+
+    $ pip install ice-g2p
+    # Download the g2p models
+    $ fetch-models     
+    
 Clone the repository and create a virtual environment in the project root directory. Install the requirements:
 
-    git clone git@github.com:grammatek/ice-g2p.git
-	cd ice-g2p
-	python -m venv g2p-venv
-	source g2p-venv/bin/activate
-	pip install -r requirements.txt
-
+    $ git clone git@github.com:grammatek/ice-g2p.git
+    $ cd ice-g2p
+    $ python3 -m venv g2p-venv
+    $ source g2p-venv/bin/activate
+    $ pip install -e .
+    $ fetch-models
 
 
 ## Command line interface
@@ -29,15 +35,15 @@ Characters allowed: _[aábcðdeéfghiíjklmnoóprstuúvxyýzþæö]_. If other c
 
 To transcribe text, currently two main options are available, direct from stdin to stdout or from file or a collection of files (directory) 
 
-    $ python3 src/ice-g2p/main.py -i 'hljóðrita þetta takk'
+    $ ice-g2p -i 'hljóðrita þetta takk'
 	l_0 j ou D r I t a T E h t a t_h a h k
 
-    $ python3 src/ice-g2p/main.py -i 'þetta war fürir þig'
+    $ ice-g2p -i 'þetta war fürir þig'
     war contains non valid character(s) {'w'}, skipping transcription.
     fürir contains non valid character(s) {'ü'}, skipping transcription.
     T E h t a   T I: G
 
-	%python src/ice-g2p/main.py -if file_to_transcribe.txt
+	$ ice-g2p -if file_to_transcribe.txt
 
 If the input comes from stdin, the output is written to stdout. Input from file(s) is written to file(s) with the same name with the suffix '_transcribed.tsv'. The files are transcribed line by line and written out correspondingly. 
 
@@ -57,7 +63,7 @@ The options available:
   	--sep, -s             use word separator
 	--dict, -d            use pronunciation dictionary
 	--langdetect, -l      use word-based language detection
-    --phoneticalpha, -p   return the output in a specific alphabet (default: SAMPA)
+    --phoneticalpha, -p   return the output in a specific alphabet (default: SAMPA, currently also available: IPA, SINGLE, FLITE)
 
 Using the `-k` flag keeps the original grapheme strings and for file input/output writes the original strings in the first column of the tab separated output file, and the phonetic transcription in the second one.
 The `-s`flag adds the defined word separator to the transcription and with the `-y` flag syllabification is added to 
@@ -67,24 +73,48 @@ using the `-t` flag.
 With the `-d` flag all tokens are first looked up in an existing pronunciation dictionary, the automatic g2p is then 
 only a fallback for words not contained in the dictionary. 
 
-    %python src/ice-g2p/main.py -i 'hljóðrita þetta takk' -k -s '-'
+    $ ice-g2p -i 'hljóðrita þetta takk' -k -s '-'
 	hljóðrita þetta takk : l_0 j ou D r I t a - T E h t a - t_h a h k
 
-	%python src/ice-g2p/main.py -i 'hljóðrita þetta takk' -k -y '.' -s '.' -t
+	$ ice-g2p -i 'hljóðrita þetta takk' -k -y '.' -s '.' -t
 	hljóðrita þetta takk : l_0 j ou1 D . r I0 . t a0 . T E1 h . t a0 . t_h a1 h k
 
 Using the `-l` flag allows for word-based language detection, where words considered foreign are transcribed by an LSTM trained on English words instead of Icelandic. If this flag is used, the module can handle common non-Icelandic characters, including all of the English alphabet:
 
-    %python src/ice-g2p/main.py -i 'hljóðrita þetta please'
+    $ ice-g2p -i 'hljóðrita þetta please'
 	l_0 j ou D r I t a T E h t a t_h a p_h l E: a s E
 	
-	%python src/ice-g2p/main.py -i 'hljóðrita þetta please' -l
+	$ ice-g2p -i 'hljóðrita þetta please' -l
 	l_0 j ou D r I t a T E h t a p_h l i: s
 
+## Import to project
+
+To use ice-g2p in a Python project, you import the Transcriber:
+
+    from ice_g2p.transcriber import Transcriber
+
+    g2p = Transcriber()
+    grapheme_string = 'halló heimur'
+    transcribed = g2p.transcribe(grapheme_string)
+    # transcribed == 'h a l ou h ei: m Y r'
+
+To use another phonetic alphabet, import the converter too:
+
+    from ice_g2p.transcriber import Transcriber
+    from ice_g2p.converter import Converter
+    
+    g2p = Transcriber()
+    conv = Converter()
+    grapheme_string = 'góðan daginn heimur'
+    transcribed = g2p.transcribe(grapheme_string)
+    # transcribed == 'k ou: D a n t ai j I n h ei: m Y r'
+    converted = conv.convert(transcribed, 'SAMPA', 'IPA')
+    # converted == 'k ouː ð a n t ai j ɪ n h eiː m ʏ r'
+    
 
 ## Data
 
-The file [sampa_ipa_single_flite.tsv](https://github.com/grammatek/ice-g2p/tree/master/src/ice_g2p/data/sampa_ipa_single_flite.tsv) contains all the phonetic alphabets that have been used in Icelandic speech technology projects 
+The file [sampa_ipa_single_flite.csv](https://github.com/grammatek/ice-g2p/tree/master/src/ice_g2p/data/sampa_ipa_single_flite.csv) contains all the phonetic alphabets that have been used in Icelandic speech technology projects 
 with in the language technology program. 
 
 * [X-SAMPA](https://en.wikipedia.org/wiki/X-SAMPA)
