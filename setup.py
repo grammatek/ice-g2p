@@ -18,7 +18,7 @@ from urllib.request import urlopen
 from logging import getLogger
 from setuptools import setup
 
-MODEL_URL = "https://github.com/grammatek/ice-g2p/releases/download/v1.1/ice-g2p-models.zip"
+MODEL_URL = "https://github.com/grammatek/ice-g2p/releases/download/v1.2.0/ice-g2p-models.zip"
 
 log = getLogger(__name__)
 

@@ -26,6 +26,12 @@ Clone the repository and create a virtual environment in the project root direct
     $ pip install -e .
     $ fetch-models
 
+If you run into ``wheel`` error, install ``wheel`` before you install this project:
+
+```
+$ (venv) pip install wheel
+$ (venv) pip install -e .
+```
 
 ## Command line interface
 
