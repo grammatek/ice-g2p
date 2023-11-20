@@ -4,7 +4,9 @@
 """
 
 import os
+import logging
 from fairseq.models.transformer import TransformerModel
+logging.getLogger('fairseq').setLevel(logging.WARNING)
 
 # if word separation is required in transcribed output
 # use this separator
