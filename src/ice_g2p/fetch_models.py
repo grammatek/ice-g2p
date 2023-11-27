@@ -10,7 +10,7 @@ from urllib.request import urlopen
 from logging import getLogger
 
 log = getLogger(__name__)
-MODELS_URL = "https://github.com/grammatek/ice-g2p/releases/download/v1.1/ice-g2p-models.zip"
+MODELS_URL = "https://github.com/grammatek/ice-g2p/releases/download/v1.2.0/ice-g2p-models.zip"
 MODELS_DIR = 'fairseq_models'
 
 
