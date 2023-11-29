@@ -76,13 +76,7 @@ class FairseqG2P:
             if not wrd:
                 continue
             # start with lookup
-            transcr = ''
-            if use_dict:
-                transcr = self.automatic_g2p_dict.get(wrd)
-            if use_dict and self.custom_dict and not transcr:
-                transcr = self.custom_dict.get(wrd)
-            if use_dict and not transcr:
-                transcr = self.pron_dict.get(wrd, '')
+            transcr = self.dict_lookup(wrd, use_dict)
             if not transcr:
                 # if transcription not yet found, perform automatic g2p
                 if set(wrd).difference(self.alphabet):
@@ -90,7 +84,7 @@ class FairseqG2P:
                         set(wrd).difference(self.alphabet)) + ', skipping transcription.')
                     continue
                 # use the current g2p model to transcribe the word automatically
-                transcr = self.model_transcribe(wrd)
+                transcr = self.model_transcribe(wrd, use_dict)
                 # add to automatic_g2p_dict so that each word only gets transcribed once in batch processing.
                 self.automatic_g2p_dict[wrd] = transcr
 
@@ -104,15 +98,29 @@ class FairseqG2P:
 
         return transcribed
 
-    def model_transcribe(self, wrd):
+    def dict_lookup(self, wrd, use_dict):
+        """ Look up the transcription of wrd in the available dictionaries if use_dict==True and return the
+        transcription.
+        If use_dict==False or if no transcription is found, return an empty string. """
+        if not use_dict:
+            return ''
+        transcr = self.automatic_g2p_dict.get(wrd)
+        if self.custom_dict and not transcr:
+            transcr = self.custom_dict.get(wrd)
+        if not transcr:
+            transcr = self.pron_dict.get(wrd, '')
+        return transcr
+
+    def model_transcribe(self, wrd, use_dict):
         """ Transcribe 'wrd', if the compound analysis detects compound parts, transcribe each part
         separately and join the transcripts into one string. Return the transcript of 'wrd'. """
-
         transcr = ''
         # if wrd is a compound, transcribe each compound part separately
         comp_parts = compound_analysis.get_compound_parts(wrd)
         for i, part in enumerate(comp_parts):
-            t = self.g2p_model.translate(' '.join(part))
+            t = self.dict_lookup(part, use_dict)
+            if not t:
+                t = self.g2p_model.translate(' '.join(part))
             if i > 0:
                 # currently we only transcribe long vowels in the first syllable
                 # this is not entirely correct, but as long as the pronunciation dictionary
