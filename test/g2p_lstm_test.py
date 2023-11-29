@@ -64,7 +64,7 @@ class TestG2P_LSTM(unittest.TestCase):
         # input_str: str, icelandic=True, syllab=False, use_dict=False, word_sep: str=None, cmu=False
         transcribed = g2p.transcribe(test_string, cmu=True)
         print(transcribed)
-        self.assertEqual('("hljóðritaður" nil (((l_0 j ou D ) 1) ((r I ) 0) ((t a ) 0) ((D Y r ) 0))) ("texti" nil (((t_h E k s ) 1) ((t I ) 0)))', transcribed)
+        self.assertEqual('("hljóðritaður" nil (((l_0 j ou: D ) 1) ((r I ) 0) ((t a ) 0) ((D Y r ) 0))) ("texti" nil (((t_h E k s ) 1) ((t I ) 0)))', transcribed)
 
     def test_custom_dict(self):
         custom_dict = self.get_custom_dict()

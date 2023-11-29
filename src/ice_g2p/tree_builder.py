@@ -154,13 +154,44 @@ def extract_compound_components(comp_tree):
             extract_compound_components(right_tree)
 
 
+def extract_compound_components_token_only(comp_tree):
+    """
+    As long as compound components can be extracted, extract compound components recursively.
+
+    :param comp_tree: a tree containing one root element. If compound components are found, they are added
+    as children of the root.
+    :return:
+    """
+    mod, head = lookup_compound_components(comp_tree.elem.word)
+    if len(mod) > 0 and len(head) > 0:
+        left_elem = entry.PronDictEntry(word=mod)
+        left_tree = CompoundTree(left_elem)
+        comp_tree.left = left_tree
+        right_elem = entry.PronDictEntry(word=head)
+        right_tree = CompoundTree(right_elem)
+        comp_tree.right = right_tree
+        extract_compound_components_token_only(left_tree)
+        extract_compound_components_token_only(right_tree)
+
+
 def build_compound_tree(entry):
     """
-    :param entry: a PronDictEntry
+    :param entry: a PronDictEntry with transcription
     :return: a binary tree based on compound division
     """
 
     comp_tree = CompoundTree(entry)
     extract_compound_components(comp_tree)
+    return comp_tree
+
+
+def build_compound_tree_token_only(entry):
+    """
+    :param entry: a PronDictEntry, not necessarily containing a transcription
+    :return: a binary tree based on compound division
+    """
+
+    comp_tree = CompoundTree(entry)
+    extract_compound_components_token_only(comp_tree)
     return comp_tree
 
