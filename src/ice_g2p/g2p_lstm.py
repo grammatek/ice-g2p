@@ -6,6 +6,9 @@
 import os
 import logging
 from fairseq.models.transformer import TransformerModel
+
+from ice_g2p import compound_analysis
+
 logging.getLogger('fairseq').setLevel(logging.WARNING)
 
 # if word separation is required in transcribed output
@@ -81,15 +84,13 @@ class FairseqG2P:
             if use_dict and not transcr:
                 transcr = self.pron_dict.get(wrd, '')
             if not transcr:
-
                 # if transcription not yet found, perform automatic g2p
                 if set(wrd).difference(self.alphabet):
                     print(text + ' contains non valid character(s) ' + str(
                         set(wrd).difference(self.alphabet)) + ', skipping transcription.')
                     continue
-
-                transcr = self.g2p_model.translate(' '.join(wrd))
-
+                # use the current g2p model to transcribe the word automatically
+                transcr = self.model_transcribe(wrd)
                 # add to automatic_g2p_dict so that each word only gets transcribed once in batch processing.
                 self.automatic_g2p_dict[wrd] = transcr
 
@@ -102,6 +103,24 @@ class FairseqG2P:
             transcribed = ' '.join(transcribed_arr)
 
         return transcribed
+
+    def model_transcribe(self, wrd):
+        """ Transcribe 'wrd', if the compound analysis detects compound parts, transcribe each part
+        separately and join the transcripts into one string. Return the transcript of 'wrd'. """
+
+        transcr = ''
+        # if wrd is a compound, transcribe each compound part separately
+        comp_parts = compound_analysis.get_compound_parts(wrd)
+        for i, part in enumerate(comp_parts):
+            t = self.g2p_model.translate(' '.join(part))
+            if i > 0:
+                # currently we only transcribe long vowels in the first syllable
+                # this is not entirely correct, but as long as the pronunciation dictionary
+                # follows this rule, we follow it here as well
+                t = t.replace(':', '')
+            transcr += t + ' '
+        transcr = transcr.strip()
+        return transcr
 
     @staticmethod
     def read_prondict(dialect: str) -> dict:
